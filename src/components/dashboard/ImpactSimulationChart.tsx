@@ -1,5 +1,3 @@
-"use client";
-
 import { useSimulationStore } from "@/store/simulationStore";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useMemo } from 'react';

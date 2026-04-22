@@ -2,12 +2,13 @@ import Navbar from "@/components/layout/Navbar";
 import EnvironmentalControls from "@/components/dashboard/EnvironmentalControls";
 import SpeciesMindMap from "@/components/dashboard/SpeciesMindMap";
 import ImpactSimulationChart from "@/components/dashboard/ImpactSimulationChart";
-
-export const metadata = {
-  title: "Dashboard | EcoPredict Simulation",
-};
+import { useEffect } from "react";
 
 export default function DashboardPage() {
+  useEffect(() => {
+    document.title = "Dashboard | EcoPredict Simulation";
+  }, []);
+
   return (
     <div className="min-h-screen bg-bg">
       <Navbar />

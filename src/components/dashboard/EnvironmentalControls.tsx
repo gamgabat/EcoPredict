@@ -1,5 +1,3 @@
-"use client";
-
 import { useSimulationStore } from "@/store/simulationStore";
 import { Thermometer, Droplets, FlaskConical, Waves } from "lucide-react";
 

@@ -1,11 +1,10 @@
-"use client";
-
 import Navbar from "@/components/layout/Navbar";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { ArrowRight, Activity, Search, Shield } from "lucide-react";
+import React from "react";
 
-export default function Home() {
+export default function LandingPage() {
   return (
     <div className="min-h-screen bg-bg selection:bg-primary/30">
       <Navbar />
@@ -37,7 +36,7 @@ export default function Home() {
           
           <div className="flex items-center gap-4 mt-8">
             <Link 
-              href="/dashboard"
+              to="/dashboard"
               className="flex items-center gap-2 bg-primary hover:bg-primaryHover text-bg font-bold px-8 py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transform hover:-translate-y-1"
             >
               Launch Platform Prototype
