@@ -1,47 +1,31 @@
-Technology Stack for EcoPredict Platform
-Frontend Framework:
+# Technology Stack for EcoPredict Platform
 
-React 18+ with TypeScript (TSX)
-Next.js 14+ for full-stack capabilities and optimized deployment
-Tailwind CSS for responsive design and styling
+## Frontend Framework (Updated)
+- **React 18+ with TypeScript (TSX)**
+- **Vite** (swapped from Next.js 14+ for optimal Single Page Application performance, native reactive visualization mapping, and faster compilation).
+- **React Router DOM** for client-side routing.
+- **Tailwind CSS v4** utilizing an isolated, rigorous `--color-*` token system for strict architectural fidelity.
 
-UI/Visualization Libraries:
+## UI/Visualization Libraries
+- **React Flow** (reactflow) for the interactive mind map interface containing biological node networks (e.g. corals, algae, herbivores).
+- **Recharts** for simulation result visualization and population cascade analytics over time.
+- **D3.js** for intricate core ecosystem relationship graphs and data processing within visualizations.
+- **Framer Motion** for premium interactive physics, micro-animations, and dynamic dashboards aesthetics.
 
-D3.js for complex ecosystem simulation visualizations
-React Flow for interactive mind map and species relationship diagrams
-Recharts or Chart.js for data visualization and analytics dashboards
-Framer Motion for smooth animations and transitions
-React Three Fiber (optional) for 3D ecosystem visualization
+## State Management
+- **Zustand** for lightning-fast global state manipulation without prop-drilling (vital for real-time reactivity when adjusting pH/Temperature sliders impacting the Recharts/ReactFlow instances).
+- **React Query/TanStack Query** for eventual API hook management and server caching when deployed alongside real AI backends.
 
-State Management:
+## Backend & Database (Microservices / Sever-Side Integration)
+- **Node.js/Python API endpoints** (Planned) to support model training on regional biodiversity.
+- **PostgreSQL with Prisma ORM** to persistently store saved ecosystem instances, EIA report templates, and subscription data.
+- **Redis** caching for simulation queries.
 
-Zustand or Redux Toolkit for global state management
-React Query/TanStack Query for server state and API data caching
+## AI/ML Integration
+- **Python ML services** for heavy mathematical prediction logic based on traditional Environmental baseline data.
+- **TensorFlow.js / ONNX.js** loaded client-side for rapid inference and immediate graph updating inside the dashboard.
 
-Backend & Database:
-
-Next.js API Routes for serverless backend functions
-PostgreSQL with Prisma ORM for biodiversity dataset storage
-Redis for simulation result caching and real-time data
-
-AI/ML Integration:
-
-Python backend services for ML prediction models
-TensorFlow.js or ONNX.js for client-side inference
-FastAPI for AI model serving and data processing endpoints
-Pandas and NumPy for biodiversity data manipulation
-
-Deployment & Infrastructure:
-
-Vercel for frontend deployment and serverless functions
-Docker for containerized AI services
-GitHub Actions for CI/CD pipeline
-Vercel Analytics for performance monitoring
-
-Additional Tools:
-
-ESLint + Prettier for code quality
-Jest + Testing Library for unit testing
-Storybook for component development and documentation
-
-This stack provides scalability for NGO clients while maintaining development efficiency on Vercel.
+## Deployment & Utilities
+- **Vercel** for continuous deployment of the Vite frontend build.
+- **html2pdf.js** (or similar) to facilitate direct EIA regulatory compliance report exports.
+- **ESLint + Prettier** for code formatting.

@@ -1,44 +1,69 @@
 import Navbar from "@/components/layout/Navbar";
-import EnvironmentalControls from "@/components/dashboard/EnvironmentalControls";
 import SpeciesMindMap from "@/components/dashboard/SpeciesMindMap";
+import SimulationViewMap from "@/components/dashboard/SimulationViewMap";
 import ImpactSimulationChart from "@/components/dashboard/ImpactSimulationChart";
 import { useEffect } from "react";
+import { useSimulationStore } from "@/store/simulationStore";
 
 export default function DashboardPage() {
+  const { currentYear, setCurrentYear } = useSimulationStore();
+
   useEffect(() => {
-    document.title = "Dashboard | EcoPredict Simulation";
+    document.title = "Coral Reef EIA Simulator | EcoPredict";
   }, []);
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="h-screen w-screen overflow-hidden bg-bg flex flex-col">
       <Navbar />
       
-      <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto flex flex-col gap-8">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-textMain tracking-tight w-fit flex items-center gap-3">
-            Ecosystem Impact Simulator
-            <span className="px-3 py-1 bg-primary/20 text-primary text-sm rounded-full font-medium border border-primary/30">
-              Live Prototype
-            </span>
-          </h1>
-          <p className="text-textMuted max-w-2xl">
-            Manipulate environmental parameters in real-time to observe hypothetical ecosystem stability 
-            and predict relationships of undiscovered species via AI mapping logic.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Controls Sidebar */}
-          <aside className="lg:col-span-1">
-            <EnvironmentalControls />
-          </aside>
-
-          {/* Main Visualizations */}
-          <div className="lg:col-span-3 flex flex-col gap-6">
+      <main className="flex-1 w-full flex flex-col lg:flex-row mt-16 p-4 gap-4 overflow-hidden">
+        
+        {/* Pane 1: Node Map & Global Timeline */}
+        <div className="flex-[1.5] flex flex-col bg-bgCard rounded-2xl border border-border overflow-hidden relative shadow-lg">
+          {/* Header Row w/ Timeline */}
+          <div className="p-4 border-b border-border bg-bg/50 backdrop-blur-sm z-10 flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold text-textMain text-sm uppercase tracking-wider">
+                System Logic Editor
+              </h2>
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-md">Blender-Style Node Map</span>
+            </div>
+            
+            <div className="flex items-center gap-4 bg-bgCard border border-border p-2 rounded-lg">
+              <label className="text-xs font-bold text-textMuted uppercase whitespace-nowrap">Timeline Year: <span className="text-textMain">{currentYear}</span></label>
+              <input 
+                type="range" min="2024" max="2074" step="1" 
+                value={currentYear} 
+                onChange={(e) => setCurrentYear(parseInt(e.target.value))}
+                className="w-full accent-primary cursor-pointer h-2 bg-textMuted rounded-lg appearance-none"
+              />
+            </div>
+          </div>
+          
+          {/* Mind Map Area (Flex grow) */}
+          <div className="flex-1 relative">
             <SpeciesMindMap />
-            <ImpactSimulationChart />
           </div>
         </div>
+
+        {/* Pane 2: Visualization Center */}
+        <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+          {/* Top half: Geographic Simulation View */}
+          <div className="flex-1 bg-bgCard rounded-2xl border border-border shadow-lg flex flex-col overflow-hidden relative">
+            <div className="p-3 border-b border-border bg-bg/50 backdrop-blur-sm absolute w-full z-10">
+              <h2 className="font-bold text-textMain text-sm uppercase tracking-wider">
+                Spatial Simulation Map
+              </h2>
+            </div>
+            <SimulationViewMap />
+          </div>
+          
+          {/* Bottom half: Analytical Recharts */}
+          <div className="h-64 bg-bgCard rounded-2xl border border-border shadow-lg p-3">
+             <ImpactSimulationChart />
+          </div>
+        </div>
+
       </main>
     </div>
   );
