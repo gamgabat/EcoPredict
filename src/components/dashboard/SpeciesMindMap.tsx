@@ -15,12 +15,14 @@ import ParameterNode from './nodes/ParameterNode';
 import SpeciesNode from './nodes/SpeciesNode';
 import WorldNode from './nodes/WorldNode';
 import GroupNode from './nodes/GroupNode';
+import UnknownSpeciesNode from './nodes/UnknownSpeciesNode';
 
 const nodeTypes = {
   parameter: ParameterNode,
   species: SpeciesNode,
   world: WorldNode,
   customGroup: GroupNode,
+  unknownSpecies: UnknownSpeciesNode,
 };
 
 const initialNodes: Node[] = [
@@ -33,6 +35,11 @@ const initialNodes: Node[] = [
   { 
     id: 'group-bio', type: 'customGroup', position: { x: 700, y: -50 }, 
     data: { label: 'Target Species', color: '#3b82f6', width: 500, height: 480 },
+    style: { zIndex: -1 } 
+  },
+  { 
+    id: 'group-unknown', type: 'customGroup', position: { x: 700, y: 510 }, 
+    data: { label: '✦ AI-Predicted Unknown Species', color: '#a855f7', width: 560, height: 240 },
     style: { zIndex: -1 } 
   },
 
@@ -54,13 +61,17 @@ const initialNodes: Node[] = [
   { id: 'c-porites', type: 'species', parentNode: 'group-bio', extent: 'parent', position: { x: 290, y: 40 }, data: { label: 'Porites astreoides', speciesId: 'coral', accentColor: '#f97316' } },
   { id: 'c-monta', type: 'species', parentNode: 'group-bio', extent: 'parent', position: { x: 290, y: 165 }, data: { label: 'Montastraea cavern.', speciesId: 'coral', accentColor: '#f97316' } },
   { id: 'c-sidera', type: 'species', parentNode: 'group-bio', extent: 'parent', position: { x: 290, y: 290 }, data: { label: 'Siderastrea siderea', speciesId: 'coral', accentColor: '#f97316' } },
+
+  // --- UNKNOWN SPECIES (Inside group-unknown) ---
+  { id: 'u-alpha', type: 'unknownSpecies', parentNode: 'group-unknown', extent: 'parent', position: { x: 20, y: 60 }, data: { label: 'Unknown Species α', unknownId: 'alpha', accentColor: '#a855f7' } },
+  { id: 'u-beta', type: 'unknownSpecies', parentNode: 'group-unknown', extent: 'parent', position: { x: 300, y: 60 }, data: { label: 'Unknown Species β', unknownId: 'beta', accentColor: '#7c3aed' } },
 ];
 
 export default function SpeciesMindMap() {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
 
-  const { getEcosystemMetrics } = useSimulationStore();
+  const { temperature, phLevel, nitrogenLoading, scltdOutbreakRisk, salinity, currentYear, getEcosystemMetrics } = useSimulationStore();
 
   useEffect(() => {
     const { algaeCover, bleachingRisk } = getEcosystemMetrics();
@@ -88,9 +99,20 @@ export default function SpeciesMindMap() {
       { id: 'e-bio-alg-por', source: 's-algae', target: 'c-porites', animated: isAlgaeBlooming, style: { stroke: isAlgaeBlooming ? '#ef4444' : '#334155', strokeWidth: isAlgaeBlooming ? 3 : 1 } },
       { id: 'e-bio-alg-mon', source: 's-algae', target: 'c-monta', animated: isAlgaeBlooming, style: { stroke: isAlgaeBlooming ? '#ef4444' : '#334155', strokeWidth: isAlgaeBlooming ? 3 : 1 }, label: isAlgaeBlooming ? 'Smothering' : '', labelBgStyle: { fill: 'var(--color-bgCard)'}, labelStyle: { fill: '#ef4444'} },
       { id: 'e-bio-alg-sid', source: 's-algae', target: 'c-sidera', animated: isAlgaeBlooming, style: { stroke: isAlgaeBlooming ? '#ef4444' : '#334155', strokeWidth: isAlgaeBlooming ? 3 : 1 } },
+      
+      // 4. Unknown Species Wires & Interactions
+      // Unknown species receive world conditions
+      { id: 'e-world-alpha', source: 'hub-world', target: 'u-alpha', style: { stroke: '#a855f7', strokeWidth: 1.5, strokeDasharray: '6 3' }, animated: true },
+      { id: 'e-world-beta', source: 'hub-world', target: 'u-beta', style: { stroke: '#7c3aed', strokeWidth: 1.5, strokeDasharray: '6 3' }, animated: true },
+
+      // Alpha predates algae — show connection
+      { id: 'e-alpha-algae', source: 'u-alpha', target: 's-algae', style: { stroke: '#a855f7', strokeDasharray: '4 4', strokeWidth: 1.5 }, label: 'Predation', labelBgStyle: { fill: 'var(--color-bgCard)' }, labelStyle: { fill: '#a855f7' } },
+
+      // Beta buffers SCLTD
+      { id: 'e-beta-scltd', source: 'u-beta', target: 'p-scltd', style: { stroke: '#7c3aed', strokeDasharray: '4 4', strokeWidth: 1.5 }, label: 'Buffers', labelBgStyle: { fill: 'var(--color-bgCard)' }, labelStyle: { fill: '#7c3aed' } },
     ];
     setEdges(dynamicEdges);
-  }, [getEcosystemMetrics]);
+  }, [temperature, phLevel, nitrogenLoading, scltdOutbreakRisk, salinity, currentYear, getEcosystemMetrics]);
 
   const onNodesChange = useCallback((changes: NodeChange[]) => setNodes((nds) => applyNodeChanges(changes, nds)), []);
   const onEdgesChange = useCallback((changes: EdgeChange[]) => setEdges((eds) => applyEdgeChanges(changes, eds)), []);
