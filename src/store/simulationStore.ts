@@ -61,6 +61,8 @@ interface SimulationState {
     damselFishActivity: number;
     zooplanktonDensity: number;
     spongeCompetition: number;
+    unknownAlphaEffect: number;
+    unknownBetaEffect: number;
   }
 }
 
@@ -168,10 +170,22 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     let spongeCompetition = 20 + (effectiveNitrogen * 0.3) + (Math.max(0, 60 - coralHealth) * 0.4);
     spongeCompetition = Math.max(0, Math.min(100, spongeCompetition));
 
+    // 9. Unknown species effectiveness (how much they're actually helping/hurting)
+    // Alpha: grazes algae → effectiveness scales with current algae problem
+    const unknownAlphaEffect = areUnknownSpeciesDiscovered
+      ? Math.min(100, (unknownSpeciesAlpha.predationStrength * (algaeCover / 100)) * 1.5 + unknownSpeciesAlpha.populationEstimate * 0.3)
+      : 0;
+
+    // Beta: fights disease + nitrogen → effectiveness scales with current threat level
+    const unknownBetaEffect = areUnknownSpeciesDiscovered
+      ? Math.min(100, (unknownSpeciesBeta.diseaseResistance * (effectiveScltd / 100)) * 1.2 + (unknownSpeciesBeta.nutrientUptake * (effectiveNitrogen / 100)) * 0.8 + unknownSpeciesBeta.populationEstimate * 0.3)
+      : 0;
+
     return {
       diademaHealth, algaeCover, coralHealth, bleachingRisk,
       parrotfishHealth, surgeonFishHealth, grouperHealth, lionfishDanger,
-      damselFishActivity, zooplanktonDensity, spongeCompetition
+      damselFishActivity, zooplanktonDensity, spongeCompetition,
+      unknownAlphaEffect, unknownBetaEffect,
     };
   }
 }));

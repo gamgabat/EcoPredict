@@ -238,12 +238,27 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
   }
 
   if (nodeId === 'u-alpha') {
+    const effect = metrics.unknownAlphaEffect;
+    const statusText = effect < 20 ? 'Dormant' : effect < 50 ? 'Active' : 'Dominant';
+    const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#a855f7' : '#c084fc';
     return (
       <div className="flex flex-col gap-4">
         <div className="text-[10px] px-2 py-1 rounded-full font-bold inline-flex items-center gap-1 self-start"
           style={{ backgroundColor: '#a855f720', color: '#a855f7', border: '1px solid #a855f740' }}>
           ✦ AI-Predicted Species
         </div>
+
+        <Section title="Live Effectiveness">
+          <div className="flex justify-between items-center">
+            <HealthBar value={effect} color="#a855f7" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(effect)}%</span>
+          </div>
+          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
+          <div className="text-[9px] text-textMuted/70 bg-bg/60 rounded p-2 border border-border/50">
+            Effectiveness rises as algae cover increases — this species becomes more impactful the worse the algae bloom gets.
+          </div>
+        </Section>
+
         <Section title="Predicted Traits">
           <SliderRow label="Predation Strength" value={store.unknownSpeciesAlpha.predationStrength} unit="%" accentColor="#a855f7" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesAlpha({ predationStrength: v })} />
           <SliderRow label="Space Competition" value={store.unknownSpeciesAlpha.competitionWithCoral} unit="%" accentColor="#a855f7" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesAlpha({ competitionWithCoral: v })} />
@@ -261,12 +276,27 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
   }
 
   if (nodeId === 'u-beta') {
+    const effect = metrics.unknownBetaEffect;
+    const statusText = effect < 20 ? 'Dormant' : effect < 50 ? 'Active' : 'Dominant';
+    const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#7c3aed' : '#a78bfa';
     return (
       <div className="flex flex-col gap-4">
         <div className="text-[10px] px-2 py-1 rounded-full font-bold inline-flex items-center gap-1 self-start"
           style={{ backgroundColor: '#7c3aed20', color: '#7c3aed', border: '1px solid #7c3aed40' }}>
           ✦ AI-Predicted Species
         </div>
+
+        <Section title="Live Effectiveness">
+          <div className="flex justify-between items-center">
+            <HealthBar value={effect} color="#7c3aed" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(effect)}%</span>
+          </div>
+          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
+          <div className="text-[9px] text-textMuted/70 bg-bg/60 rounded p-2 border border-border/50">
+            Effectiveness rises with SCLTD disease risk and nitrogen overload — this species becomes a stronger buffer the more threatened the reef is.
+          </div>
+        </Section>
+
         <Section title="Predicted Traits">
           <SliderRow label="Disease Resistance" value={store.unknownSpeciesBeta.diseaseResistance} unit="%" accentColor="#7c3aed" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesBeta({ diseaseResistance: v })} />
           <SliderRow label="Nutrient Uptake" value={store.unknownSpeciesBeta.nutrientUptake} unit="%" accentColor="#7c3aed" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesBeta({ nutrientUptake: v })} />
