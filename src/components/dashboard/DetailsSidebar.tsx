@@ -110,8 +110,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 // ── Per-creature detail content ───────────────────────────────────────────────
 function CreatureDetail({ nodeId }: { nodeId: string }) {
   const store = useSimulationStore();
-  const { diademaHealth, algaeCover, coralHealth, bleachingRisk } = store.getEcosystemMetrics();
-  const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk } = store;
+  const metrics = store.getEcosystemMetrics();
+  const { diademaHealth, algaeCover, coralHealth, bleachingRisk } = metrics;
+  const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk, lionfishPresence } = store;
 
   if (nodeId === 's-diadema') {
     const status = diademaHealth < 40 ? 'Population Crash' : diademaHealth < 65 ? 'Declining' : 'Healthy';
