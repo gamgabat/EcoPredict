@@ -63,7 +63,24 @@ interface SimulationState {
     spongeCompetition: number;
     unknownAlphaEffect: number;
     unknownBetaEffect: number;
-  }
+  };
+
+  getCoralResilienceMetrics: () => {
+    /** 0–100 final resilience score for each species */
+    porites: number;
+    siderastrea: number;
+    montastraea: number;
+    /** The shared environmental condition score (0–1) */
+    envScore: number;
+    /** Individual factor scores (0–1) for display */
+    factors: {
+      temperature: number;
+      scltd: number;
+      nitrogen: number;
+      ph: number;
+      salinity: number;
+    };
+  };
 }
 
 export const useSimulationStore = create<SimulationState>((set, get) => ({
@@ -187,5 +204,80 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       damselFishActivity, zooplanktonDensity, spongeCompetition,
       unknownAlphaEffect, unknownBetaEffect,
     };
-  }
+  },
+
+  getCoralResilienceMetrics: () => {
+    const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk } = get();
+
+    // ── Baseline resiliences (under optimal conditions) ───────────────────────
+    // Porites astreoides  : 78% — tolerates sedimentation, turbidity, light var.
+    //                             but susceptible to SCLTD
+    // Siderastrea siderea : 63% — massive, long-lived, but susceptible to
+    //                             temperature stress and disease
+    // Montastraea cavernosa: 40% — highly susceptible to SCLTD; sensitive to
+    //                              nitrogen and pH changes
+    const BASELINE = { porites: 78, siderastrea: 63, montastraea: 40 };
+
+    // ── Environmental factor scores (0–1) ─────────────────────────────────────
+    // Temperature: optimal 23–28°C → score 1.0; degrades above/below
+    let tempScore: number;
+    if (temperature <= 23) {
+      tempScore = Math.max(0, 1 - (23 - temperature) * 0.15);
+    } else if (temperature <= 28) {
+      tempScore = 1.0;
+    } else if (temperature <= 29) {
+      tempScore = 1.0 - (temperature - 28) * 0.2;
+    } else {
+      tempScore = Math.max(0, 0.8 - (temperature - 29) * 0.25);
+    }
+
+    // SCLTD: 0% → 1.0, 16% → 0.80, 50% → 0.50, 100% → 0.0
+    const scltdScore = Math.max(0, 1 - scltdOutbreakRisk / 100);
+
+    // Nitrogen: 0% → 1.0, 52% → 0.60, 100% → 0.20
+    const nitrogenScore = Math.max(0, 1 - (nitrogenLoading / 100) * 0.8);
+
+    // pH: 8.1–8.3 optimal → 1.0; 7.5 → ~0.55; below 7.0 → 0
+    let phScore: number;
+    if (phLevel >= 8.1) {
+      phScore = Math.max(0, 1 - (phLevel - 8.3) * 0.5); // above 8.3 → slight drop
+    } else if (phLevel >= 7.9) {
+      phScore = 1.0 - (8.1 - phLevel) * 0.3;
+    } else {
+      phScore = Math.max(0, 0.94 - (7.9 - phLevel) * 1.3);
+    }
+    phScore = Math.max(0, Math.min(1, phScore));
+
+    // Salinity: 34–36 ppt optimal → 1.0; outside range → drops
+    let salinityScore: number;
+    if (salinity >= 34 && salinity <= 36) {
+      salinityScore = 1.0;
+    } else if (salinity < 34) {
+      salinityScore = Math.max(0, 1 - (34 - salinity) * 0.1);
+    } else {
+      salinityScore = Math.max(0, 1 - (salinity - 36) * 0.1);
+    }
+
+    // ── Combined environmental condition score ────────────────────────────────
+    const envScore = tempScore * scltdScore * nitrogenScore * phScore * salinityScore;
+
+    // ── Final resilience per species ──────────────────────────────────────────
+    const porites     = BASELINE.porites     * envScore;
+    const siderastrea = BASELINE.siderastrea * envScore;
+    const montastraea = BASELINE.montastraea * envScore;
+
+    return {
+      porites,
+      siderastrea,
+      montastraea,
+      envScore,
+      factors: {
+        temperature: tempScore,
+        scltd:       scltdScore,
+        nitrogen:    nitrogenScore,
+        ph:          phScore,
+        salinity:    salinityScore,
+      },
+    };
+  },
 }));

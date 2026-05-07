@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSimulationStore } from '@/store/simulationStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -62,7 +62,7 @@ interface ToleranceRowProps {
   invertDanger?: boolean; // for metrics where higher is worse (e.g. disease)
 }
 
-function ToleranceRow({ label, current, safeMin, safeMax, warnMin, warnMax, unit, icon, invertDanger }: ToleranceRowProps) {
+function ToleranceRow({ label, current, safeMin, safeMax, warnMin, warnMax, unit, icon }: ToleranceRowProps) {
   const inSafe = current >= safeMin && current <= safeMax;
   const inWarn = !inSafe && warnMin !== undefined && warnMax !== undefined && current >= warnMin && current <= warnMax;
   const status = inSafe ? 'safe' : inWarn ? 'warn' : 'danger';
@@ -111,7 +111,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function CreatureDetail({ nodeId }: { nodeId: string }) {
   const store = useSimulationStore();
   const metrics = store.getEcosystemMetrics();
-  const { diademaHealth, algaeCover, coralHealth, bleachingRisk } = metrics;
+  const { diademaHealth, algaeCover, bleachingRisk } = metrics;
   const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk, lionfishPresence } = store;
 
   if (nodeId === 's-diadema') {
@@ -189,22 +189,67 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
 
   if (nodeId === 'c-porites' || nodeId === 'c-monta' || nodeId === 'c-sidera') {
     const isBleaching = bleachingRisk > 30;
-    const status = isBleaching ? 'Bleaching' : coralHealth < 30 ? 'Critical' : coralHealth < 55 ? 'Stressed' : 'Healthy';
-    const statusColor = isBleaching ? '#ef4444' : coralHealth < 30 ? '#ef4444' : coralHealth < 55 ? '#f59e0b' : '#22c55e';
+    const rm = store.getCoralResilienceMetrics();
 
-    const speciesData: Record<string, { name: string; depth: string; growth: string; resilience: string; notes: string }> = {
-      'c-porites': { name: 'Porites astreoides', depth: '0–50 m', growth: '3–5 mm/yr (massive form)', resilience: 'High — tolerates turbidity & pollution', notes: 'Star coral; one of the most common Caribbean coral. Can survive mild bleaching.' },
-      'c-monta': { name: 'Montastraea cavernosa', depth: '1–70 m', growth: '5–12 mm/yr', resilience: 'Moderate — sensitive to sedimentation', notes: 'Great star coral; ecologically dominant in deep reef zones. Major reef builder.' },
-      'c-sidera': { name: 'Siderastrea siderea', depth: '0–70 m', growth: '4–6 mm/yr', resilience: 'Very High — most tolerant of Caribbean corals', notes: 'Massive starlet coral; extremely durable. Survives bleaching events that kill others.' },
+    const speciesData: Record<string, {
+      name: string; depth: string; growth: string;
+      baseline: number;
+      finalResilience: number;
+      toleranceNote: string;
+      notes: string;
+    }> = {
+      'c-porites': {
+        name: 'Porites astreoides',
+        depth: '0–50 m', growth: '3–5 mm/yr (massive form)',
+        baseline: 78,
+        finalResilience: rm.porites,
+        toleranceNote: 'Highly tolerant of sedimentation, light variability & degraded reefs — but susceptible to SCLTD',
+        notes: 'Star coral; one of the most common Caribbean corals. Can survive mild bleaching.',
+      },
+      'c-sidera': {
+        name: 'Siderastrea siderea',
+        depth: '0–70 m', growth: '4–6 mm/yr',
+        baseline: 63,
+        finalResilience: rm.siderastrea,
+        toleranceNote: 'Massive, long-lived — but easily affected by temperature extremes and disease',
+        notes: 'Massive starlet coral; extremely durable. Survives bleaching events that kill others.',
+      },
+      'c-monta': {
+        name: 'Montastraea cavernosa',
+        depth: '1–70 m', growth: '5–12 mm/yr',
+        baseline: 40,
+        finalResilience: rm.montastraea,
+        toleranceNote: 'Highly susceptible to SCLTD; sensitive to nitrogen loading and pH changes',
+        notes: 'Great star coral; ecologically dominant in deep reef zones. Major reef builder.',
+      },
     };
     const sp = speciesData[nodeId];
 
+    const finalR = sp.finalResilience;
+    const status = isBleaching ? 'Bleaching' : finalR < 15 ? 'Critical' : finalR < 35 ? 'Stressed' : 'Healthy';
+    const statusColor = isBleaching ? '#ef4444' : finalR < 15 ? '#ef4444' : finalR < 35 ? '#f59e0b' : '#22c55e';
+
+    const factorRow = (label: string, score: number, icon: string) => {
+      const pct = Math.round(score * 100);
+      const fc = score > 0.75 ? '#22c55e' : score > 0.45 ? '#f59e0b' : '#ef4444';
+      return (
+        <div key={label} className="flex items-center gap-2">
+          <span className="text-base w-5 flex-shrink-0">{icon}</span>
+          <span className="text-[10px] text-textMuted w-16 flex-shrink-0">{label}</span>
+          <div className="flex-1 bg-textMuted/20 rounded-full h-1.5 overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: fc }} />
+          </div>
+          <span className="text-[10px] font-mono text-textMain w-8 text-right flex-shrink-0">{pct}%</span>
+        </div>
+      );
+    };
+
     return (
       <div className="flex flex-col gap-4">
-        <Section title="Colony Health">
+        <Section title="Colony Resilience">
           <div className="flex justify-between items-center">
-            <HealthBar value={coralHealth} color="#f97316" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(coralHealth)}%</span>
+            <HealthBar value={finalR} color="#f97316" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{finalR.toFixed(1)}%</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold" style={{ color: statusColor }}>{status}</span>
@@ -213,12 +258,26 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           {isBleaching && <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">⚠ Reduce temperature below 29°C or increase coral resilience to halt bleaching.</div>}
         </Section>
 
-        <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={23} safeMax={29} warnMin={20} warnMax={31} unit="°C" icon="🌡️" />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.9} safeMax={8.3} warnMin={7.7} warnMax={8.5} unit="" icon="⚗️" />
-          <ToleranceRow label="Salinity" current={salinity} safeMin={32} safeMax={42} warnMin={28} warnMax={45} unit=" ppt" icon="🧂" />
-          <ToleranceRow label="Algae Cover" current={algaeCover} safeMin={0} safeMax={25} warnMin={0} warnMax={40} unit="%" icon="🌿" invertDanger />
-          <ToleranceRow label="SCLTD Risk" current={scltdOutbreakRisk} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon="🦠" invertDanger />
+        <Section title="Resilience Formula">
+          <div className="bg-bg/60 border border-border/50 rounded p-2 flex flex-col gap-1">
+            <div className="text-[9px] text-textMuted/80 font-mono">Final = Baseline × Env. Condition Score</div>
+            <div className="text-[9px] font-mono text-textMain">
+              {finalR.toFixed(1)} = {sp.baseline}% × {(rm.envScore * 100).toFixed(1)}%
+            </div>
+          </div>
+          <div className="text-[9px] text-textMuted/70 px-1">{sp.toleranceNote}</div>
+        </Section>
+
+        <Section title="Env. Condition Score Breakdown">
+          {factorRow('Temp', rm.factors.temperature, '🌡️')}
+          {factorRow('SCLTD', rm.factors.scltd, '🦠')}
+          {factorRow('Nitrogen', rm.factors.nitrogen, '⚗️')}
+          {factorRow('pH', rm.factors.ph, '💧')}
+          {factorRow('Salinity', rm.factors.salinity, '🧂')}
+          <div className="flex items-center gap-2 border-t border-border pt-2 mt-1">
+            <span className="text-[10px] text-textMuted flex-1">Combined Score</span>
+            <span className="text-[10px] font-bold font-mono text-textMain">{(rm.envScore * 100).toFixed(1)}%</span>
+          </div>
         </Section>
 
         <Section title="Controls">
@@ -229,7 +288,7 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <InfoChip label="Species" value={sp.name} />
           <InfoChip label="Depth Range" value={sp.depth} />
           <InfoChip label="Growth Rate" value={sp.growth} />
-          <InfoChip label="Resilience" value={sp.resilience} />
+          <InfoChip label="Baseline Resilience" value={`${sp.baseline}% (optimal conditions)`} />
           <InfoChip label="Bleach Threshold" value=">29°C for 2+ weeks" />
           <InfoChip label="Notes" value={sp.notes} />
         </Section>
@@ -537,6 +596,17 @@ export default function DetailsSidebar() {
     'p-sponge':  '#d97706',
   };
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = 0;
+      }
+    }, 250); // wait for Framer Motion exit animation (200ms) to complete
+    return () => clearTimeout(timer);
+  }, [selectedNodeId]);
+
   return (
     <div className="h-full flex flex-col gap-0 overflow-hidden">
       {/* ── Top: Global Environment ── */}
@@ -561,7 +631,7 @@ export default function DetailsSidebar() {
       </div>
 
       {/* ── Bottom: Selected Creature ── */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
         <AnimatePresence mode="wait">
           {selectedNodeId && NODE_LABELS[selectedNodeId] ? (
             <motion.div
