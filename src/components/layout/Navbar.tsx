@@ -9,7 +9,7 @@ export default function Navbar() {
         <span className="text-xl font-bold tracking-tight text-textMain">EcoPredict EIA</span>
       </Link>
       <div className="ml-auto flex items-center gap-6">
-        <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+        <span className="text-sm font-medium text-textMain bg-bgHover px-3 py-1 rounded-sm border border-border">
           Simulation Dashboard
         </span>
         <Link 

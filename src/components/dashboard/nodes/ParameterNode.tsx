@@ -30,11 +30,11 @@ export default function ParameterNode({ data }: ParameterNodeProps) {
   };
 
   return (
-    <div className="bg-bgCard border border-border rounded-xl p-3 shadow-lg min-w-[200px]" style={{ borderColor: data.accentColor }}>
+    <div className="bg-bgCard border border-border rounded-sm p-3 shadow-lg min-w-[200px]" style={{ borderColor: data.accentColor }}>
       <div className="flex justify-between items-center mb-2">
         <label className="text-xs font-bold text-textMain uppercase tracking-wider">{data.label}</label>
-        <span className="text-xs text-textMuted bg-bg px-2 py-0.5 rounded font-mono border border-border">
-          {value}{data.unit}
+        <span className="text-xs text-textMuted bg-bg px-2 py-0.5 rounded-sm font-mono border border-border">
+          {typeof value === 'number' ? value.toFixed(data.step < 1 ? 1 : 0) : value}{data.unit}
         </span>
       </div>
       

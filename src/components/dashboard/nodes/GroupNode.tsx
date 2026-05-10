@@ -8,7 +8,7 @@ export default function GroupNode({ data, selected }: NodeProps) {
 
   return (
     <div 
-      className={`rounded-2xl transition-all duration-300 ${selected ? 'shadow-[0_0_15px_rgba(255,255,255,0.2)]' : ''}`}
+      className={`rounded-sm transition-all duration-300 ${selected ? 'shadow-[0_0_15px_rgba(255,255,255,0.2)]' : ''}`}
       style={{
         width: `${width}px`, 
         height: `${height}px`,
@@ -18,11 +18,11 @@ export default function GroupNode({ data, selected }: NodeProps) {
       }}
     >
       <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-full font-bold text-xs uppercase tracking-widest border backdrop-blur-md z-10"
+        className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1 rounded-sm font-bold text-xs uppercase tracking-widest border backdrop-blur-md z-10"
         style={{
           backgroundColor: `${color}20`,
           borderColor: color,
-          color: color,
+          color: 'var(--color-textMain)',
           whiteSpace: 'nowrap'
         }}
       >

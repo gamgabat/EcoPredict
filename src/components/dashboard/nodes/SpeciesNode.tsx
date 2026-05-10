@@ -67,14 +67,14 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
       break;
   }
 
-  const barColor = isBleaching ? '#f8fafc' : data.accentColor;
-  const bgColor = isBleaching ? '#fdfbf7' : isInvader ? '#1a0a0a' : 'var(--color-bgCard)';
-  const textColor = isBleaching ? '#0f172a' : 'var(--color-textMain)';
+  const barColor = isBleaching ? '#ffffff' : data.accentColor;
+  const bgColor = isBleaching ? '#fafafa' : isInvader ? '#0a0a0a' : 'var(--color-bgCard)';
+  const textColor = isBleaching ? '#0a0a0a' : 'var(--color-textMain)';
   const badgeColor = isInvader ? '#ef4444' : isBleaching ? '#ef4444' : data.accentColor;
 
   return (
     <div
-      className="border rounded-xl p-3 shadow-xl min-w-[160px] transition-colors duration-500"
+      className="border rounded-sm p-3 shadow-xl min-w-[160px] transition-colors duration-500"
       style={{ backgroundColor: bgColor, borderColor: barColor }}
     >
       <Handle type="target" position={Position.Left} className="w-3 h-3 border-2 border-bgCard" style={{ background: barColor }} />
@@ -83,8 +83,8 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
         <div className="flex justify-between items-start gap-2">
           <label className="text-xs font-bold leading-tight" style={{ color: textColor }}>{data.label}</label>
           <span
-            className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0"
-            style={{ backgroundColor: `${badgeColor}25`, color: badgeColor, borderColor: badgeColor }}
+            className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm border flex-shrink-0"
+            style={{ backgroundColor: `${badgeColor}25`, color: 'var(--color-textMain)', borderColor: badgeColor }}
           >
             {statusText}
           </span>

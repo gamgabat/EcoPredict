@@ -20,7 +20,7 @@ export default function DashboardPage() {
       <main className="flex-1 w-full flex flex-col lg:flex-row mt-16 p-4 gap-4 overflow-hidden">
         
         {/* Pane 1: Details Sidebar */}
-        <div className="w-72 flex-shrink-0 bg-bgCard rounded-2xl border border-border shadow-lg overflow-hidden flex flex-col">
+        <div className="w-72 flex-shrink-0 bg-bgCard rounded-sm border border-border shadow-lg overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border bg-bg/50 backdrop-blur-sm flex-shrink-0">
             <h2 className="font-bold text-textMain text-sm uppercase tracking-wider">Details</h2>
             <p className="text-[10px] text-textMuted mt-0.5">Click a node to inspect it</p>
@@ -31,7 +31,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Pane 2: Node Map & Global Timeline */}
-        <div className="flex-[1.5] flex flex-col bg-bgCard rounded-2xl border border-border overflow-hidden relative shadow-lg">
+        <div className="flex-[1.5] flex flex-col bg-bgCard rounded-sm border border-border overflow-hidden relative shadow-lg">
           {/* Header Row w/ Timeline */}
           <div className="p-4 border-b border-border bg-bg/50 backdrop-blur-sm z-10 flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -44,12 +44,12 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-2.5 flex-wrap">
                   {/* Solid line = feeding/grazing */}
                   <div className="flex items-center gap-1.5">
-                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#06b6d4" strokeWidth="2"/><polygon points="15,1 20,4 15,7" fill="#06b6d4"/></svg>
+                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#a3a3a3" strokeWidth="2"/><polygon points="15,1 20,4 15,7" fill="#a3a3a3"/></svg>
                     <span className="text-[9px] text-textMuted uppercase tracking-wide">Feeding</span>
                   </div>
                   {/* Dashed line = competition/side-effect */}
                   <div className="flex items-center gap-1.5">
-                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4,2"/><polygon points="15,1 20,4 15,7" fill="#94a3b8"/></svg>
+                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#737373" strokeWidth="2" strokeDasharray="4,2"/><polygon points="15,1 20,4 15,7" fill="#737373"/></svg>
                     <span className="text-[9px] text-textMuted uppercase tracking-wide">Competition</span>
                   </div>
                   {/* Animated / pulsing = active threat */}
@@ -59,16 +59,16 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-md flex-shrink-0">Food Web</span>
+              <span className="text-xs bg-bgHover text-textMain border border-border px-2 py-1 rounded-sm flex-shrink-0">Food Web</span>
             </div>
             
-            <div className="flex items-center gap-4 bg-bgCard border border-border p-2 rounded-lg">
+            <div className="flex items-center gap-4 bg-bgCard border border-border p-2 rounded-sm">
               <label className="text-xs font-bold text-textMuted uppercase whitespace-nowrap">Timeline Year: <span className="text-textMain">{currentYear}</span></label>
               <input 
                 type="range" min="2024" max="2074" step="1" 
                 value={currentYear} 
                 onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                className="w-full accent-primary cursor-pointer h-2 bg-textMuted rounded-lg appearance-none"
+                className="w-full accent-primary cursor-pointer h-2 bg-textMuted rounded-sm appearance-none"
               />
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
         {/* Pane 3: Visualization Center */}
         <div className="flex-1 flex flex-col gap-4 overflow-hidden">
           {/* Top half: Geographic Simulation View */}
-          <div className="flex-1 bg-bgCard rounded-2xl border border-border shadow-lg flex flex-col overflow-hidden relative">
+          <div className="flex-1 bg-bgCard rounded-sm border border-border shadow-lg flex flex-col overflow-hidden relative">
             <div className="p-3 border-b border-border bg-bg/50 backdrop-blur-sm absolute w-full z-10">
               <h2 className="font-bold text-textMain text-sm uppercase tracking-wider">
                 Spatial Simulation Map
@@ -92,7 +92,7 @@ export default function DashboardPage() {
           </div>
           
           {/* Bottom half: Analytical Recharts */}
-          <div className="h-64 bg-bgCard rounded-2xl border border-border shadow-lg p-3">
+          <div className="h-64 bg-bgCard rounded-sm border border-border shadow-lg p-3">
              <ImpactSimulationChart />
           </div>
         </div>

@@ -16,24 +16,24 @@ const nodeTypes = { species: SpeciesNode, unknownSpecies: UnknownSpeciesNode };
 // ── Layout: left-to-right food web ───────────────────────────────────────────
 const defaultNodes: Node[] = [
   // Col A – Producers
-  { id: 'zoo',      type: 'species', position: { x: 0,   y: 30  }, data: { label: 'Zooplankton',          speciesId: 'zooplankton', accentColor: '#06b6d4' } },
-  { id: 's-algae',  type: 'species', position: { x: 0,   y: 260 }, data: { label: 'Macroalgae Turf',       speciesId: 'algae',       accentColor: '#10b981' } },
+  { id: 'zoo',      type: 'species', position: { x: 0,   y: 30  }, data: { label: 'Zooplankton',          speciesId: 'zooplankton', accentColor: '#d4d4d4' } },
+  { id: 's-algae',  type: 'species', position: { x: 0,   y: 260 }, data: { label: 'Macroalgae Turf',       speciesId: 'algae',       accentColor: '#d4d4d4' } },
 
   // Col B – Herbivores / Grazers
-  { id: 's-diadema', type: 'species', position: { x: 240, y: 0   }, data: { label: 'Diadema (Urchin)',      speciesId: 'diadema',     accentColor: '#64748b' } },
-  { id: 'p-surgeon', type: 'species', position: { x: 240, y: 140 }, data: { label: 'Surgeonfish',           speciesId: 'surgeonfish', accentColor: '#0ea5e9' } },
-  { id: 'p-parrot',  type: 'species', position: { x: 240, y: 280 }, data: { label: 'Parrotfish',            speciesId: 'parrotfish',  accentColor: '#8b5cf6' } },
-  { id: 'p-damsel',  type: 'species', position: { x: 240, y: 420 }, data: { label: 'Damselfish',            speciesId: 'damselfish',  accentColor: '#f59e0b' } },
+  { id: 's-diadema', type: 'species', position: { x: 240, y: 0   }, data: { label: 'Diadema (Urchin)',      speciesId: 'diadema',     accentColor: '#a3a3a3' } },
+  { id: 'p-surgeon', type: 'species', position: { x: 240, y: 140 }, data: { label: 'Surgeonfish',           speciesId: 'surgeonfish', accentColor: '#a3a3a3' } },
+  { id: 'p-parrot',  type: 'species', position: { x: 240, y: 280 }, data: { label: 'Parrotfish',            speciesId: 'parrotfish',  accentColor: '#a3a3a3' } },
+  { id: 'p-damsel',  type: 'species', position: { x: 240, y: 420 }, data: { label: 'Damselfish',            speciesId: 'damselfish',  accentColor: '#a3a3a3' } },
 
   // Col C – Predators / Competitors
-  { id: 'p-grouper', type: 'species', position: { x: 480, y: 70  }, data: { label: 'Grouper',               speciesId: 'grouper',     accentColor: '#475569' } },
-  { id: 'p-lion',    type: 'species', position: { x: 480, y: 240 }, data: { label: 'Lionfish (Invasive)',   speciesId: 'lionfish',    accentColor: '#dc2626' } },
-  { id: 'p-sponge',  type: 'species', position: { x: 480, y: 400 }, data: { label: 'Sponges',               speciesId: 'sponge',      accentColor: '#d97706' } },
+  { id: 'p-grouper', type: 'species', position: { x: 480, y: 70  }, data: { label: 'Grouper',               speciesId: 'grouper',     accentColor: '#737373' } },
+  { id: 'p-lion',    type: 'species', position: { x: 480, y: 240 }, data: { label: 'Lionfish (Invasive)',   speciesId: 'lionfish',    accentColor: '#ef4444' } },
+  { id: 'p-sponge',  type: 'species', position: { x: 480, y: 400 }, data: { label: 'Sponges',               speciesId: 'sponge',      accentColor: '#737373' } },
 
   // Col D – Reef Builders
-  { id: 'c-porites', type: 'species', position: { x: 720, y: 40  }, data: { label: 'Porites astreoides',    speciesId: 'coral',       accentColor: '#f97316' } },
-  { id: 'c-monta',   type: 'species', position: { x: 720, y: 210 }, data: { label: 'Montastraea cavern.',   speciesId: 'coral',       accentColor: '#f97316' } },
-  { id: 'c-sidera',  type: 'species', position: { x: 720, y: 380 }, data: { label: 'Siderastrea siderea',   speciesId: 'coral',       accentColor: '#f97316' } },
+  { id: 'c-porites', type: 'species', position: { x: 720, y: 40  }, data: { label: 'Porites astreoides',    speciesId: 'coral',       accentColor: '#525252' } },
+  { id: 'c-monta',   type: 'species', position: { x: 720, y: 210 }, data: { label: 'Montastraea cavern.',   speciesId: 'coral',       accentColor: '#525252' } },
+  { id: 'c-sidera',  type: 'species', position: { x: 720, y: 380 }, data: { label: 'Siderastrea siderea',   speciesId: 'coral',       accentColor: '#525252' } },
 ];
 
 // ── Edge helper ───────────────────────────────────────────────────────────────
@@ -49,6 +49,8 @@ const edge = (id: string, src: string, tgt: string, color: string, label?: strin
 export default function SpeciesMindMap() {
   const [nodes, setNodes] = useState<Node[]>(defaultNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [deletedEdges, setDeletedEdges] = useState<Set<string>>(new Set());
+  const [userEdgeMods, setUserEdgeMods] = useState<Record<string, Partial<Edge>>>({});
 
   const {
     temperature, phLevel, nitrogenLoading, scltdOutbreakRisk, salinity,
@@ -66,8 +68,8 @@ export default function SpeciesMindMap() {
         if (nds.find(n => n.id === 'u-alpha')) return nds;
         return [
           ...nds,
-          { id: 'u-alpha', type: 'unknownSpecies', position: { x: 420, y: -120 }, data: { label: 'Unknown Species α', unknownId: 'alpha', accentColor: '#a855f7' } },
-          { id: 'u-beta',  type: 'unknownSpecies', position: { x: 200, y: -120 }, data: { label: 'Unknown Species β', unknownId: 'beta',  accentColor: '#7c3aed' } },
+          { id: 'u-alpha', type: 'unknownSpecies', position: { x: 420, y: -120 }, data: { label: 'Unknown Species α', unknownId: 'alpha', accentColor: '#737373' } },
+          { id: 'u-beta',  type: 'unknownSpecies', position: { x: 200, y: -120 }, data: { label: 'Unknown Species β', unknownId: 'beta',  accentColor: '#737373' } },
         ];
       });
     } else {
@@ -82,51 +84,55 @@ export default function SpeciesMindMap() {
     const lf = lionfishDanger > 30;
 
     const dynamicEdges: Edge[] = [
-      edge('e-zoo-por', 'zoo', 'c-porites', '#06b6d4'),
-      edge('e-zoo-mon', 'zoo', 'c-monta',   '#06b6d4'),
-      edge('e-zoo-sid', 'zoo', 'c-sidera',  '#06b6d4'),
+      edge('e-zoo-por', 'zoo', 'c-porites', '#a3a3a3'),
+      edge('e-zoo-mon', 'zoo', 'c-monta',   '#a3a3a3'),
+      edge('e-zoo-sid', 'zoo', 'c-sidera',  '#a3a3a3'),
 
-      edge('e-alg-dia', 's-algae', 's-diadema', '#10b981'),
-      edge('e-alg-sur', 's-algae', 'p-surgeon', '#10b981'),
-      edge('e-alg-par', 's-algae', 'p-parrot',  '#10b981'),
+      edge('e-alg-dia', 's-algae', 's-diadema', '#a3a3a3'),
+      edge('e-alg-sur', 's-algae', 'p-surgeon', '#a3a3a3'),
+      edge('e-alg-par', 's-algae', 'p-parrot',  '#a3a3a3'),
 
-      edge('e-dam-alg', 'p-damsel', 's-algae', '#f59e0b', undefined, { animated: true }),
+      edge('e-dam-alg', 'p-damsel', 's-algae', '#737373', undefined, { animated: true }),
 
-      edge('e-dia-dam', 's-diadema', 'p-damsel', '#94a3b8', undefined, { style: { stroke: '#94a3b8', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
+      edge('e-dia-dam', 's-diadema', 'p-damsel', '#737373', undefined, { style: { stroke: '#737373', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
 
-      edge('e-grp-par', 'p-grouper', 'p-parrot',  '#475569'),
-      edge('e-grp-sur', 'p-grouper', 'p-surgeon', '#475569'),
+      edge('e-grp-par', 'p-grouper', 'p-parrot',  '#a3a3a3'),
+      edge('e-grp-sur', 'p-grouper', 'p-surgeon', '#a3a3a3'),
 
-      edge('e-lion-par', 'p-lion', 'p-parrot',  '#dc2626', undefined, { animated: lf, style: { stroke: '#dc2626', strokeDasharray: '4,2', strokeWidth: lf ? 2.5 : 1.2 } }),
-      edge('e-lion-sur', 'p-lion', 'p-surgeon', '#dc2626', undefined, { animated: lf, style: { stroke: '#dc2626', strokeDasharray: '4,2', strokeWidth: lf ? 2.5 : 1.2 } }),
-      edge('e-lion-grp', 'p-lion', 'p-grouper', '#f59e0b', undefined, { style: { stroke: '#f59e0b', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
+      edge('e-lion-par', 'p-lion', 'p-parrot',  '#ef4444', undefined, { animated: lf, style: { stroke: '#ef4444', strokeDasharray: '4,2', strokeWidth: lf ? 2.5 : 1.2 } }),
+      edge('e-lion-sur', 'p-lion', 'p-surgeon', '#ef4444', undefined, { animated: lf, style: { stroke: '#ef4444', strokeDasharray: '4,2', strokeWidth: lf ? 2.5 : 1.2 } }),
+      edge('e-lion-grp', 'p-lion', 'p-grouper', '#737373', undefined, { style: { stroke: '#737373', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
 
-      edge('e-par-mon', 'p-parrot', 'c-monta', '#d97706', undefined, { style: { stroke: '#d97706', strokeDasharray: '6,3', strokeWidth: 1.2 } }),
+      edge('e-par-mon', 'p-parrot', 'c-monta', '#737373', undefined, { style: { stroke: '#737373', strokeDasharray: '6,3', strokeWidth: 1.2 } }),
 
-      edge('e-spo-por', 'p-sponge', 'c-porites', '#d97706', undefined, { style: { stroke: '#d97706', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
-      edge('e-spo-mon', 'p-sponge', 'c-monta',   '#d97706', undefined, { style: { stroke: '#d97706', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
+      edge('e-spo-por', 'p-sponge', 'c-porites', '#737373', undefined, { style: { stroke: '#737373', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
+      edge('e-spo-mon', 'p-sponge', 'c-monta',   '#737373', undefined, { style: { stroke: '#737373', strokeDasharray: '5,3', strokeWidth: 1.2 } }),
 
-      edge('e-alg-por', 's-algae', 'c-porites', algaeThreat ? '#ef4444' : '#334155', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#334155', strokeWidth: algaeThreat ? 2.5 : 1 } }),
-      edge('e-alg-mon', 's-algae', 'c-monta',   algaeThreat ? '#ef4444' : '#334155', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#334155', strokeWidth: algaeThreat ? 2.5 : 1 } }),
-      edge('e-alg-sid', 's-algae', 'c-sidera',  algaeThreat ? '#ef4444' : '#334155', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#334155', strokeWidth: algaeThreat ? 2.5 : 1 } }),
+      edge('e-alg-por', 's-algae', 'c-porites', algaeThreat ? '#ef4444' : '#27272a', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#27272a', strokeWidth: algaeThreat ? 2.5 : 1 } }),
+      edge('e-alg-mon', 's-algae', 'c-monta',   algaeThreat ? '#ef4444' : '#27272a', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#27272a', strokeWidth: algaeThreat ? 2.5 : 1 } }),
+      edge('e-alg-sid', 's-algae', 'c-sidera',  algaeThreat ? '#ef4444' : '#27272a', undefined, { animated: algaeThreat, style: { stroke: algaeThreat ? '#ef4444' : '#27272a', strokeWidth: algaeThreat ? 2.5 : 1 } }),
     ];
 
     if (areUnknownSpeciesDiscovered) {
       dynamicEdges.push(
-        edge('e-alg-alpha', 's-algae', 'u-alpha', '#a855f7', undefined, { animated: true }),
+        edge('e-alg-alpha', 's-algae', 'u-alpha', '#a3a3a3', undefined, { animated: true }),
         edge('e-alpha-mon', 'u-alpha', 'c-monta', '#ef4444'),
-        edge('e-beta-por',  'u-beta',  'c-porites', '#7c3aed', undefined, { animated: true }),
-        edge('e-beta-mon',  'u-beta',  'c-monta',   '#7c3aed', undefined, { animated: true }),
-        edge('e-beta-sid',  'u-beta',  'c-sidera',  '#7c3aed', undefined, { animated: true }),
+        edge('e-beta-por',  'u-beta',  'c-porites', '#a3a3a3', undefined, { animated: true }),
+        edge('e-beta-mon',  'u-beta',  'c-monta',   '#a3a3a3', undefined, { animated: true }),
+        edge('e-beta-sid',  'u-beta',  'c-sidera',  '#a3a3a3', undefined, { animated: true }),
       );
     }
 
     const dynamicIds = new Set(dynamicEdges.map(e => e.id));
-    setEdges(cur => [...dynamicEdges, ...cur.filter(e => !dynamicIds.has(e.id))]);
+    setEdges(cur => [
+      ...dynamicEdges.filter(e => !deletedEdges.has(e.id)),
+      ...cur.filter(e => !dynamicIds.has(e.id))
+    ]);
   }, [
     temperature, phLevel, nitrogenLoading, scltdOutbreakRisk, salinity,
     currentYear, parrotfishPopulation, grouperPopulation, lionfishPresence,
     getEcosystemMetrics, areUnknownSpeciesDiscovered,
+    deletedEdges
   ]);
 
   // ── Focus mode: dim unrelated nodes & edges when a node is selected ──────────
@@ -151,9 +157,16 @@ export default function SpeciesMindMap() {
   }, [nodes, edges, selectedNodeId]);
 
   const displayEdges = useMemo(() => {
-    if (!selectedNodeId) return edges;
+    let baseEdges = edges.map(e => {
+      if (userEdgeMods[e.id]) {
+        return { ...e, ...userEdgeMods[e.id] };
+      }
+      return e;
+    });
 
-    return edges.map(e => {
+    if (!selectedNodeId) return baseEdges;
+
+    return baseEdges.map(e => {
       const isRelated = e.source === selectedNodeId || e.target === selectedNodeId;
       return {
         ...e,
@@ -166,19 +179,62 @@ export default function SpeciesMindMap() {
         animated: isRelated ? e.animated : false,
       };
     });
-  }, [edges, selectedNodeId]);
+  }, [edges, selectedNodeId, userEdgeMods]);
 
   const onNodesChange = useCallback((c: NodeChange[]) => setNodes(n => applyNodeChanges(c, n)), []);
-  const onEdgesChange = useCallback((c: EdgeChange[]) => setEdges(e => applyEdgeChanges(c, e)), []);
-  const onConnect     = useCallback((p: Connection | Edge) => setEdges(e => addEdge(p, e)), []);
+  const onEdgesChange = useCallback((c: EdgeChange[]) => {
+    setEdges(e => applyEdgeChanges(c, e));
+    const removedIds = c.filter(change => change.type === 'remove').map((change: any) => change.id);
+    if (removedIds.length > 0) {
+      setDeletedEdges(prev => {
+        const next = new Set(prev);
+        removedIds.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  }, []);
+  const onConnect = useCallback((p: Connection | Edge) => setEdges(e => addEdge({
+    ...p,
+    label: 'prey',
+    style: { stroke: '#a3a3a3', strokeWidth: 1.8 },
+    labelBgStyle: { fill: 'var(--color-bgCard)' },
+    labelStyle: { fill: '#a3a3a3', fontSize: 10 }
+  }, e)), []);
   const onNodeClick   = useCallback((_: any, n: Node) => setSelectedNodeId(n.id), [setSelectedNodeId]);
   const onPaneClick   = useCallback(() => setSelectedNodeId(null), [setSelectedNodeId]);
+  
+  const onEdgeClick = useCallback((_: React.MouseEvent, clickedEdge: Edge) => {
+    setUserEdgeMods(prev => {
+      const currentLabel = prev[clickedEdge.id]?.label || clickedEdge.label || '';
+      let nextLabel = 'prey';
+      let nextStyle: any = { stroke: '#a3a3a3', strokeWidth: 1.8 };
+      
+      if (currentLabel === 'prey') {
+        nextLabel = 'competition';
+        nextStyle = { stroke: '#737373', strokeDasharray: '4,2', strokeWidth: 1.8 };
+      } else if (currentLabel === 'competition') {
+        nextLabel = 'threat';
+        nextStyle = { stroke: '#ef4444', strokeWidth: 2.5 };
+      }
+
+      return {
+        ...prev,
+        [clickedEdge.id]: {
+          label: nextLabel,
+          style: nextStyle,
+          labelBgStyle: { fill: 'var(--color-bgCard)' },
+          labelStyle: { fill: nextStyle.stroke, fontSize: 10 },
+        }
+      };
+    });
+  }, []);
 
   return (
     <ReactFlow
       nodes={displayNodes} edges={displayEdges} nodeTypes={nodeTypes}
       onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
       onConnect={onConnect} onNodeClick={onNodeClick} onPaneClick={onPaneClick}
+      onEdgeClick={onEdgeClick}
       fitView className="bg-bg" nodesDraggable
     >
       <Background color="var(--color-border)" gap={24} />

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useSimulationStore } from '@/store/simulationStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Thermometer, FlaskConical, Cuboid, Bug, Droplets, Waves, Swords, CircleAlert } from 'lucide-react';
 
 // ── Reusable slider row ───────────────────────────────────────────────────────
 interface SliderRowProps {
@@ -58,7 +59,7 @@ interface ToleranceRowProps {
   warnMin?: number;
   warnMax?: number;
   unit: string;
-  icon: string;
+  icon: React.ReactNode;
   invertDanger?: boolean; // for metrics where higher is worse (e.g. disease)
 }
 
@@ -78,7 +79,7 @@ function ToleranceRow({ label, current, safeMin, safeMax, warnMin, warnMax, unit
           <span className="text-[10px] font-bold text-textMuted truncate">{label}</span>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="text-[10px] font-mono text-textMain">{typeof current === 'number' && !Number.isInteger(current) ? current.toFixed(1) : current}{unit}</span>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: `${color}20`, color }}>{labels[status]}</span>
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm" style={{ backgroundColor: `${color}20`, color }}>{labels[status]}</span>
           </div>
         </div>
         <div className="text-[9px] text-textMuted/60 mt-0.5">Safe: {safeMin}–{safeMax}{unit}</div>
@@ -128,10 +129,10 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
         </Section>
 
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={29} warnMin={20} warnMax={31} unit="°C" icon="🌡️" />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.9} safeMax={8.3} warnMin={7.7} warnMax={8.5} unit="" icon="⚗️" />
-          <ToleranceRow label="Salinity" current={salinity} safeMin={33} safeMax={36} warnMin={30} warnMax={40} unit=" ppt" icon="🧂" />
-          <ToleranceRow label="SCLTD Risk" current={scltdOutbreakRisk} safeMin={0} safeMax={15} warnMin={0} warnMax={30} unit="%" icon="🦠" invertDanger />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={29} warnMin={20} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.9} safeMax={8.3} warnMin={7.7} warnMax={8.5} unit="" icon={<FlaskConical className="w-4 h-4" />} />
+          <ToleranceRow label="Salinity" current={salinity} safeMin={33} safeMax={36} warnMin={30} warnMax={40} unit=" ppt" icon={<Cuboid className="w-4 h-4" />} />
+          <ToleranceRow label="SCLTD Risk" current={scltdOutbreakRisk} safeMin={0} safeMax={15} warnMin={0} warnMax={30} unit="%" icon={<Bug className="w-4 h-4" />} invertDanger />
         </Section>
 
         <Section title="Controls">
@@ -165,10 +166,10 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
         </Section>
 
         <Section title="Growth Conditions (Current)">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={32} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon="⚗️" invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.0} safeMax={9.0} unit="" icon="💧" />
-          <ToleranceRow label="Salinity" current={salinity} safeMin={25} safeMax={40} unit=" ppt" icon="🧂" />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon={<FlaskConical className="w-4 h-4" />} invertDanger />
+          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.0} safeMax={9.0} unit="" icon={<Droplets className="w-4 h-4" />} />
+          <ToleranceRow label="Salinity" current={salinity} safeMin={25} safeMax={40} unit=" ppt" icon={<Cuboid className="w-4 h-4" />} />
         </Section>
 
         <Section title="Controls">
@@ -229,7 +230,7 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const status = isBleaching ? 'Bleaching' : finalR < 15 ? 'Critical' : finalR < 35 ? 'Stressed' : 'Healthy';
     const statusColor = isBleaching ? '#ef4444' : finalR < 15 ? '#ef4444' : finalR < 35 ? '#f59e0b' : '#22c55e';
 
-    const factorRow = (label: string, score: number, icon: string) => {
+    const factorRow = (label: string, score: number, icon: React.ReactNode) => {
       const pct = Math.round(score * 100);
       const fc = score > 0.75 ? '#22c55e' : score > 0.45 ? '#f59e0b' : '#ef4444';
       return (
@@ -253,7 +254,7 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold" style={{ color: statusColor }}>{status}</span>
-            {isBleaching && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-error/20 text-error font-bold animate-pulse">BLEACHING</span>}
+            {isBleaching && <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-error/20 text-error font-bold animate-pulse">BLEACHING</span>}
           </div>
           {isBleaching && <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">⚠ Reduce temperature below 29°C or increase coral resilience to halt bleaching.</div>}
         </Section>
@@ -269,11 +270,11 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
         </Section>
 
         <Section title="Env. Condition Score Breakdown">
-          {factorRow('Temp', rm.factors.temperature, '🌡️')}
-          {factorRow('SCLTD', rm.factors.scltd, '🦠')}
-          {factorRow('Nitrogen', rm.factors.nitrogen, '⚗️')}
-          {factorRow('pH', rm.factors.ph, '💧')}
-          {factorRow('Salinity', rm.factors.salinity, '🧂')}
+          {factorRow('Temp', rm.factors.temperature, <Thermometer className="w-4 h-4" />)}
+          {factorRow('SCLTD', rm.factors.scltd, <Bug className="w-4 h-4" />)}
+          {factorRow('Nitrogen', rm.factors.nitrogen, <FlaskConical className="w-4 h-4" />)}
+          {factorRow('pH', rm.factors.ph, <Droplets className="w-4 h-4" />)}
+          {factorRow('Salinity', rm.factors.salinity, <Cuboid className="w-4 h-4" />)}
           <div className="flex items-center gap-2 border-t border-border pt-2 mt-1">
             <span className="text-[10px] text-textMuted flex-1">Combined Score</span>
             <span className="text-[10px] font-bold font-mono text-textMain">{(rm.envScore * 100).toFixed(1)}%</span>
@@ -302,7 +303,7 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#a855f7' : '#c084fc';
     return (
       <div className="flex flex-col gap-4">
-        <div className="text-[10px] px-2 py-1 rounded-full font-bold inline-flex items-center gap-1 self-start"
+        <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
           style={{ backgroundColor: '#a855f720', color: '#a855f7', border: '1px solid #a855f740' }}>
           ✦ AI-Predicted Species
         </div>
@@ -340,7 +341,7 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#7c3aed' : '#a78bfa';
     return (
       <div className="flex flex-col gap-4">
-        <div className="text-[10px] px-2 py-1 rounded-full font-bold inline-flex items-center gap-1 self-start"
+        <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
           style={{ backgroundColor: '#7c3aed20', color: '#7c3aed', border: '1px solid #7c3aed40' }}>
           ✦ AI-Predicted Species
         </div>
@@ -383,9 +384,9 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <span className="text-[10px] font-bold" style={{ color: sc }}>{status}</span>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Lionfish Presence" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon="🔴" invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.3} unit="" icon="⚗️" />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Lionfish Presence" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon={<CircleAlert className="w-4 h-4" />} invertDanger />
+          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.3} unit="" icon={<FlaskConical className="w-4 h-4" />} />
         </Section>
         <Section title="Controls">
           <SliderRow label="Population" value={store.parrotfishPopulation} unit="%" accentColor="#8b5cf6" min={0} max={100} step={1} onChange={store.setParrotfishPopulation} />
@@ -411,8 +412,8 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <div className="flex justify-between items-center"><HealthBar value={h} color="#0ea5e9" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Lionfish Pressure" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={45} unit="%" icon="🔴" invertDanger />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Lionfish Pressure" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={45} unit="%" icon={<CircleAlert className="w-4 h-4" />} invertDanger />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Acanthuridae" />
@@ -434,8 +435,8 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <div className="flex justify-between items-center"><HealthBar value={h} color="#475569" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={21} safeMax={29} warnMin={19} warnMax={31} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Lionfish Competition" current={lionfishPresence} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon="⚔️" invertDanger />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={21} safeMax={29} warnMin={19} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Lionfish Competition" current={lionfishPresence} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon={<Swords className="w-4 h-4" />} invertDanger />
         </Section>
         <Section title="Controls">
           <SliderRow label="Population" value={store.grouperPopulation} unit="%" accentColor="#475569" min={0} max={100} step={1} onChange={store.setGrouperPopulation} />
@@ -463,8 +464,8 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <span className="text-[10px] font-bold" style={{ color: sc }}>{label}</span>
         </Section>
         <Section title="Conditions (Thrives in)">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={35} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Reef Complexity" current={100 - metrics.coralHealth} safeMin={20} safeMax={80} unit="%" icon="🪸" />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={35} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Reef Complexity" current={100 - metrics.coralHealth} safeMin={20} safeMax={80} unit="%" icon={<Waves className="w-4 h-4" />} />
         </Section>
         <Section title="Controls">
           <SliderRow label="Presence / Pressure" value={store.lionfishPresence} unit="%" accentColor="#dc2626" min={0} max={100} step={1} onChange={store.setLionfishPresence} />
@@ -509,9 +510,9 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <div className="flex justify-between items-center"><HealthBar value={h} color="#06b6d4" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={29} warnMin={18} warnMax={31} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon="⚗️" invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.4} unit="" icon="💧" />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={29} warnMin={18} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon={<FlaskConical className="w-4 h-4" />} invertDanger />
+          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.4} unit="" icon={<Droplets className="w-4 h-4" />} />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Group" value="Copepods, amphipods, larvae, fish eggs" />
@@ -533,8 +534,8 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <span className="text-[9px] text-textMuted">Higher value = more coral space displaced</span>
         </Section>
         <Section title="Growth Conditions">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={33} unit="°C" icon="🌡️" />
-          <ToleranceRow label="Nitrogen (benefits)" current={nitrogenLoading} safeMin={10} safeMax={100} unit="%" icon="⚗️" />
+          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={33} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
+          <ToleranceRow label="Nitrogen (benefits)" current={nitrogenLoading} safeMin={10} safeMax={100} unit="%" icon={<FlaskConical className="w-4 h-4" />} />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Phylum" value="Porifera" />
@@ -658,7 +659,7 @@ export default function DetailsSidebar() {
               exit={{ opacity: 0 }}
               className="flex-1 flex flex-col items-center justify-center text-center gap-3 py-8"
             >
-              <div className="w-12 h-12 rounded-full bg-bgHover flex items-center justify-center">
+              <div className="w-12 h-12 rounded-sm bg-bgHover flex items-center justify-center">
                 <svg className="w-6 h-6 text-textMuted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
                 </svg>
@@ -697,7 +698,7 @@ export default function DetailsSidebar() {
                 }, 2000);
               }}
               disabled={isScanning}
-              className="w-full py-2.5 bg-primary hover:bg-primaryHover disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-primary hover:bg-primaryHover disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs font-bold rounded-sm transition-colors flex items-center justify-center gap-2"
             >
               {isScanning ? (
                 <>

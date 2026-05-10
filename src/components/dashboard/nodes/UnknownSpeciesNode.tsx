@@ -24,7 +24,7 @@ export default function UnknownSpeciesNode({ data }: UnknownSpeciesNodeProps) {
 
   return (
     <div
-      className="border rounded-xl p-3 shadow-xl min-w-[160px] transition-colors duration-500"
+      className="border rounded-sm p-3 shadow-xl min-w-[160px] transition-colors duration-500"
       style={{ backgroundColor: 'var(--color-bgCard)', borderColor: data.accentColor }}
     >
       <Handle type="target" position={Position.Left} className="w-3 h-3 border-2 border-bgCard" style={{ background: data.accentColor }} />
@@ -35,8 +35,8 @@ export default function UnknownSpeciesNode({ data }: UnknownSpeciesNodeProps) {
             {data.label}
           </label>
           <span
-            className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-full border flex-shrink-0"
-            style={{ backgroundColor: `${data.accentColor}25`, color: data.accentColor, borderColor: data.accentColor }}
+            className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm border flex-shrink-0"
+            style={{ backgroundColor: `${data.accentColor}25`, color: 'var(--color-textMain)', borderColor: data.accentColor }}
           >
             {statusText}
           </span>

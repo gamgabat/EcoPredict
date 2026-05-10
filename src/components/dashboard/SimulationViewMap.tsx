@@ -316,7 +316,7 @@ export default function SimulationViewMap() {
       )}
 
       {/* ── HUD Legend ── */}
-      <div className="absolute top-3 left-3 flex flex-col gap-1.5 p-2.5 rounded-xl z-20"
+      <div className="absolute top-3 left-3 flex flex-col gap-1.5 p-2.5 rounded-sm z-20"
         style={{ backgroundColor: "rgba(15,23,42,0.75)", backdropFilter: "blur(8px)", border: "1px solid rgba(51,65,85,0.6)" }}>
         <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "#94a3b8" }}>Population</span>
         {[
@@ -335,7 +335,7 @@ export default function SimulationViewMap() {
           </div>
         ))}
         {isBleaching && (
-          <div className="text-[8px] font-bold px-1.5 py-0.5 rounded mt-0.5 text-center animate-pulse"
+          <div className="text-[8px] font-bold px-1.5 py-0.5 rounded-sm mt-0.5 text-center animate-pulse"
             style={{ backgroundColor: "rgba(239,68,68,0.2)", color: "#f87171", border: "1px solid rgba(239,68,68,0.4)" }}>
             ⚠ BLEACHING EVENT
           </div>
