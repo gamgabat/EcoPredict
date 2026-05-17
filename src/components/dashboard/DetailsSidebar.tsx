@@ -698,11 +698,11 @@ export default function DetailsSidebar() {
                 }, 2000);
               }}
               disabled={isScanning}
-              className="w-full py-2.5 bg-primary hover:bg-primaryHover disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs font-bold rounded-sm transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-primary hover:bg-primaryHover disabled:opacity-60 disabled:cursor-not-allowed text-bg text-xs font-bold rounded-sm transition-colors flex items-center justify-center gap-2"
             >
               {isScanning ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
                   Scanning Ecosystem...
                 </>
               ) : (

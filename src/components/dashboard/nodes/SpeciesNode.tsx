@@ -68,8 +68,8 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
   }
 
   const barColor = isBleaching ? '#ffffff' : data.accentColor;
-  const bgColor = isBleaching ? '#fafafa' : isInvader ? '#0a0a0a' : 'var(--color-bgCard)';
-  const textColor = isBleaching ? '#0a0a0a' : 'var(--color-textMain)';
+  const bgColor = isBleaching ? '#ffffff' : isInvader ? 'var(--color-textMain)' : 'var(--color-bgCard)';
+  const textColor = isBleaching ? '#111111' : isInvader ? 'var(--color-bg)' : 'var(--color-textMain)';
   const badgeColor = isInvader ? '#ef4444' : isBleaching ? '#ef4444' : data.accentColor;
 
   return (
@@ -84,7 +84,7 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
           <label className="text-xs font-bold leading-tight" style={{ color: textColor }}>{data.label}</label>
           <span
             className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm border flex-shrink-0"
-            style={{ backgroundColor: `${badgeColor}25`, color: 'var(--color-textMain)', borderColor: badgeColor }}
+            style={{ backgroundColor: `${badgeColor}25`, color: textColor, borderColor: badgeColor }}
           >
             {statusText}
           </span>

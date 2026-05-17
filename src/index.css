@@ -6,18 +6,18 @@
   Use only the colors defined below (e.g. bg-bg, bg-bgCard, text-textMain).
 */
 @theme {
-  --color-bg: #0a0a0a;
-  --color-bgCard: #171717;
-  --color-bgHover: #262626;
+  --color-bg: #F7F6F2;
+  --color-bgCard: #FFFFFF;
+  --color-bgHover: #EAE8DF;
   
-  --color-primary: #ffffff;
-  --color-primaryHover: #e5e5e5;
-  --color-secondary: #a3a3a3;
-  --color-accent: #737373;
+  --color-primary: #185EA4;
+  --color-primaryHover: #134B83;
+  --color-secondary: #0F6E56;
+  --color-accent: #0B513F;
   
-  --color-textMain: #fafafa;
-  --color-textMuted: #a1a1aa;
-  --color-border: #27272a;
+  --color-textMain: #111111;
+  --color-textMuted: #52525B;
+  --color-border: #D4D4D8;
   --color-error: #ef4444;
   --color-success: #22c55e;
 }
