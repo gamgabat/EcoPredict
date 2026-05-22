@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { useSimulationStore } from '@/store/simulationStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Thermometer, FlaskConical, Cuboid, Bug, Droplets, Waves, Swords, CircleAlert } from 'lucide-react';
+import DisruptionPanel from './DisruptionPanel';
 
 // ── Reusable slider row ───────────────────────────────────────────────────────
 interface SliderRowProps {
@@ -14,16 +15,25 @@ interface SliderRowProps {
   step: number;
   onChange: (v: number) => void;
   locked?: boolean;
+  deltaLabel?: string;
+  deltaColor?: string;
 }
 
-function SliderRow({ label, value, unit, accentColor, min, max, step, onChange, locked }: SliderRowProps) {
+function SliderRow({ label, value, unit, accentColor, min, max, step, onChange, locked, deltaLabel, deltaColor }: SliderRowProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex justify-between items-center">
         <label className="text-xs font-bold text-textMuted">{label}</label>
-        <span className="text-xs text-textMain font-mono bg-bg px-1.5 py-0.5 rounded border border-border">
-          {typeof value === 'number' ? value.toFixed(step < 1 ? 1 : 0) : value}{unit}
-        </span>
+        <div className="flex items-center gap-2">
+          {deltaLabel && (
+            <span className="text-[10px] font-mono px-1 rounded-sm whitespace-nowrap" style={{ color: deltaColor, backgroundColor: `${deltaColor}20` }}>
+              {deltaLabel}
+            </span>
+          )}
+          <span className="text-xs text-textMain font-mono bg-bg px-1.5 py-0.5 rounded border border-border">
+            {typeof value === 'number' ? value.toFixed(step < 1 ? 1 : 0) : value}{unit}
+          </span>
+        </div>
       </div>
       <input
         type="range"
@@ -303,9 +313,15 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#a855f7' : '#c084fc';
     return (
       <div className="flex flex-col gap-4">
-        <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
-          style={{ backgroundColor: '#a855f720', color: '#a855f7', border: '1px solid #a855f740' }}>
-          ✦ AI-Predicted Species
+        <div className="flex flex-col gap-2">
+          <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
+            style={{ backgroundColor: '#a855f720', color: '#a855f7', border: '1px solid #a855f740' }}>
+            ✦ AI-Predicted Species
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-textMain">{store.unknownSpeciesAlpha.nicheName || 'Unknown Species α'}</span>
+            <span className="text-[10px] text-textMuted leading-snug">{store.unknownSpeciesAlpha.triggerCondition}</span>
+          </div>
         </div>
 
         <Section title="Live Effectiveness">
@@ -341,9 +357,15 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#7c3aed' : '#a78bfa';
     return (
       <div className="flex flex-col gap-4">
-        <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
-          style={{ backgroundColor: '#7c3aed20', color: '#7c3aed', border: '1px solid #7c3aed40' }}>
-          ✦ AI-Predicted Species
+        <div className="flex flex-col gap-2">
+          <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
+            style={{ backgroundColor: '#7c3aed20', color: '#7c3aed', border: '1px solid #7c3aed40' }}>
+            ✦ AI-Predicted Species
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-textMain">{store.unknownSpeciesBeta.nicheName || 'Unknown Species β'}</span>
+            <span className="text-[10px] text-textMuted leading-snug">{store.unknownSpeciesBeta.triggerCondition}</span>
+          </div>
         </div>
 
         <Section title="Live Effectiveness">
@@ -557,10 +579,8 @@ export default function DetailsSidebar() {
   const store = useSimulationStore();
   const { 
     selectedNodeId,
-    areUnknownSpeciesDiscovered, setUnknownSpeciesDiscovered,
+    areUnknownSpeciesDiscovered,
     isScanning, setIsScanning,
-    setUnknownSpeciesAlpha, setUnknownSpeciesBeta,
-    nitrogenLoading, scltdOutbreakRisk, getEcosystemMetrics
   } = store;
 
   const NODE_LABELS: Record<string, string> = {
@@ -598,6 +618,7 @@ export default function DetailsSidebar() {
   };
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [scanFailed, setScanFailed] = React.useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -608,16 +629,45 @@ export default function DetailsSidebar() {
     return () => clearTimeout(timer);
   }, [selectedNodeId]);
 
+  const renderDelta = (paramKey: string, current: number, isHarmfulIncrease: boolean, isHarmfulDecrease: boolean = false) => {
+    if (!store.activeScenario || !store.baselineSnapshot) return undefined;
+    const base = store.baselineSnapshot[paramKey];
+    if (base === undefined) return undefined;
+    const delta = current - base;
+    if (Math.abs(delta) < 0.01) return undefined;
+    
+    const sign = delta > 0 ? '↑' : '↓';
+    const num = Math.abs(delta).toFixed(1);
+    
+    let color = '#3b82f6'; // blue for neutral
+    if (delta > 0 && isHarmfulIncrease) color = '#ef4444'; // red
+    if (delta < 0 && isHarmfulDecrease) color = '#ef4444'; // red
+    
+    return {
+      label: `[${sign} ${delta > 0 ? '+' : '-'}${num} from baseline]`,
+      color
+    };
+  };
+
+  const tDelta = renderDelta('temperature', store.temperature, true);
+  const sDelta = renderDelta('scltdOutbreakRisk', store.scltdOutbreakRisk, true);
+  const nDelta = renderDelta('nitrogenLoading', store.nitrogenLoading, true);
+  const pDelta = renderDelta('phLevel', store.phLevel, false, true); // pH drop is harmful
+  const salDelta = renderDelta('salinity', store.salinity, true, true); // Salinity change either way can be stressful, let's treat deviation as harmful
+  
+  const isScenarioActive = !!store.activeScenario;
+
   return (
     <div className="h-full flex flex-col gap-0 overflow-hidden">
+      <DisruptionPanel />
       {/* ── Top: Global Environment ── */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 border-b border-border">
         <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70">Environment</h3>
-        <SliderRow label="Temperature" value={store.temperature} unit="°C" accentColor="#f59e0b" min={20} max={35} step={0.5} onChange={store.setTemperature} />
-        <SliderRow label="SCLTD Disease" value={store.scltdOutbreakRisk} unit="%" accentColor="#ef4444" min={0} max={100} step={1} onChange={store.setScltdOutbreakRisk} />
-        <SliderRow label="Nitrogen Loading" value={store.nitrogenLoading} unit="%" accentColor="#84cc16" min={0} max={100} step={1} onChange={store.setNitrogenLoading} />
-        <SliderRow label="pH Level" value={store.phLevel} unit="" accentColor="#10b981" min={7.0} max={8.5} step={0.1} onChange={store.setPhLevel} />
-        <SliderRow label="Salinity" value={store.salinity} unit=" ppt" accentColor="#3b82f6" min={20} max={45} step={1} onChange={store.setSalinity} />
+        <SliderRow label="Temperature" value={store.temperature} unit="°C" accentColor="#f59e0b" min={20} max={35} step={0.5} onChange={store.setTemperature} locked={isScenarioActive} deltaLabel={tDelta?.label} deltaColor={tDelta?.color} />
+        <SliderRow label="SCLTD Disease" value={store.scltdOutbreakRisk} unit="%" accentColor="#ef4444" min={0} max={100} step={1} onChange={store.setScltdOutbreakRisk} locked={isScenarioActive} deltaLabel={sDelta?.label} deltaColor={sDelta?.color} />
+        <SliderRow label="Nitrogen Loading" value={store.nitrogenLoading} unit="%" accentColor="#84cc16" min={0} max={100} step={1} onChange={store.setNitrogenLoading} locked={isScenarioActive} deltaLabel={nDelta?.label} deltaColor={nDelta?.color} />
+        <SliderRow label="pH Level" value={store.phLevel} unit="" accentColor="#10b981" min={7.0} max={8.5} step={0.1} onChange={store.setPhLevel} locked={isScenarioActive} deltaLabel={pDelta?.label} deltaColor={pDelta?.color} />
+        <SliderRow label="Salinity" value={store.salinity} unit=" ppt" accentColor="#3b82f6" min={20} max={45} step={1} onChange={store.setSalinity} locked={isScenarioActive} deltaLabel={salDelta?.label} deltaColor={salDelta?.color} />
         <div className="border-t border-border pt-3">
           <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70 mb-3">Species Controls</h3>
           <div className="flex flex-col gap-3">
@@ -680,21 +730,17 @@ export default function DetailsSidebar() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="flex-shrink-0 p-3 border-t border-border"
+            className="flex-shrink-0 p-3 border-t border-border flex flex-col gap-2"
           >
             <button
               onClick={() => {
                 setIsScanning(true);
-                const { algaeCover } = getEcosystemMetrics();
+                setScanFailed(false);
                 setTimeout(() => {
-                  const newAlphaPred = Math.floor(Math.random() * 30) + (algaeCover > 40 ? 40 : 10);
-                  const newAlphaComp = Math.floor(Math.random() * 20);
-                  const newBetaDisease = Math.floor(Math.random() * 30) + (scltdOutbreakRisk > 20 ? 40 : 10);
-                  const newBetaNutrient = Math.floor(Math.random() * 30) + (nitrogenLoading > 30 ? 40 : 10);
-                  setUnknownSpeciesAlpha({ predationStrength: newAlphaPred, competitionWithCoral: newAlphaComp, populationEstimate: Math.floor(Math.random() * 40) + 20 });
-                  setUnknownSpeciesBeta({ diseaseResistance: newBetaDisease, nutrientUptake: newBetaNutrient, populationEstimate: Math.floor(Math.random() * 40) + 20 });
-                  setIsScanning(false);
-                  setUnknownSpeciesDiscovered(true);
+                  store.runNichePrediction();
+                  if (!useSimulationStore.getState().areUnknownSpeciesDiscovered) {
+                    setScanFailed(true);
+                  }
                 }, 2000);
               }}
               disabled={isScanning}
@@ -714,6 +760,11 @@ export default function DetailsSidebar() {
                 </>
               )}
             </button>
+            {scanFailed && (
+              <div className="text-[10px] text-error bg-error/10 border border-error/30 p-2 rounded text-center font-medium">
+                No additional niches detected under current conditions. Try applying a disruption scenario.
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

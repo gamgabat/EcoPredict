@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { DisruptionScenario } from '../types/disruption';
+import { runNichePrediction } from '../engine/nichePredictor';
 
 interface SimulationState {
   temperature: number; // Celsius, 26-32 typical for reef
@@ -20,14 +22,21 @@ interface SimulationState {
 
   // --- Unknown Species (AI-predicted) ---
   areUnknownSpeciesDiscovered: boolean;
-  unknownSpeciesAlpha: { predationStrength: number; competitionWithCoral: number; populationEstimate: number; };
-  unknownSpeciesBeta: { diseaseResistance: number; nutrientUptake: number; populationEstimate: number; };
+  unknownSpeciesAlpha: { predationStrength: number; competitionWithCoral: number; populationEstimate: number; nicheName: string; triggerCondition: string; };
+  unknownSpeciesBeta: { diseaseResistance: number; nutrientUptake: number; populationEstimate: number; nicheName: string; triggerCondition: string; };
 
   // --- Selected Node (for Details pane) ---
   selectedNodeId: string | null;
 
+  // --- Disruption Scenario State ---
+  activeScenario: DisruptionScenario | null;
+  baselineSnapshot: Record<string, number> | null;
+
   // --- Discovery scanning state ---
   isScanning: boolean;
+
+  _cachedMetrics: { diademaHealth: number; algaeCover: number; coralHealth: number; bleachingRisk: number; parrotfishHealth: number; surgeonFishHealth: number; grouperHealth: number; lionfishDanger: number; damselFishActivity: number; zooplanktonDensity: number; spongeCompetition: number; unknownAlphaEffect: number; unknownBetaEffect: number; } | null;
+  _metricsKey: string;
 
   setTemperature: (val: number) => void;
   setHumidity: (val: number) => void;
@@ -48,6 +57,10 @@ interface SimulationState {
   setUnknownSpeciesBeta: (val: Partial<SimulationState['unknownSpeciesBeta']>) => void;
   setSelectedNodeId: (id: string | null) => void;
   setIsScanning: (val: boolean) => void;
+
+  applyDisruption: (scenario: DisruptionScenario) => void;
+  clearDisruption: () => void;
+  runNichePrediction: () => void;
 
   getEcosystemMetrics: () => {
     diademaHealth: number;
@@ -100,10 +113,16 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   lionfishPresence: 10,
 
   areUnknownSpeciesDiscovered: false,
-  unknownSpeciesAlpha: { predationStrength: 20, competitionWithCoral: 10, populationEstimate: 30 },
-  unknownSpeciesBeta: { diseaseResistance: 20, nutrientUptake: 40, populationEstimate: 45 },
+  unknownSpeciesAlpha: { predationStrength: 0, competitionWithCoral: 0, populationEstimate: 0, nicheName: '', triggerCondition: '' },
+  unknownSpeciesBeta: { diseaseResistance: 0, nutrientUptake: 0, populationEstimate: 0, nicheName: '', triggerCondition: '' },
   selectedNodeId: null,
   isScanning: false,
+
+  activeScenario: null,
+  baselineSnapshot: null,
+
+  _cachedMetrics: null,
+  _metricsKey: '',
 
   setTemperature: (val) => set({ temperature: val }),
   setHumidity: (val) => set({ humidity: val }),
@@ -125,19 +144,84 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
   setSelectedNodeId: (id) => set({ selectedNodeId: id }),
   setIsScanning: (val) => set({ isScanning: val }),
 
+  applyDisruption: (scenario) => set((state) => {
+    const currentParams = {
+      temperature: state.temperature,
+      salinity: state.salinity,
+      phLevel: state.phLevel,
+      nitrogenLoading: state.nitrogenLoading,
+      scltdOutbreakRisk: state.scltdOutbreakRisk
+    };
+    const baselineSnapshot = state.baselineSnapshot || currentParams;
+    const newTemp = Math.max(26, Math.min(32, baselineSnapshot.temperature + (scenario.parameterDeltas.temperature || 0)));
+    const newSalinity = Math.max(30, Math.min(40, baselineSnapshot.salinity + (scenario.parameterDeltas.salinity || 0)));
+    const newPh = Math.max(7.0, Math.min(8.5, baselineSnapshot.phLevel + (scenario.parameterDeltas.phLevel || 0)));
+    const newNitrogen = Math.max(0, Math.min(100, baselineSnapshot.nitrogenLoading + (scenario.parameterDeltas.nitrogenLoading || 0)));
+    const newScltd = Math.max(0, Math.min(100, baselineSnapshot.scltdOutbreakRisk + (scenario.parameterDeltas.scltdOutbreakRisk || 0)));
+
+    return {
+      baselineSnapshot,
+      activeScenario: scenario,
+      temperature: newTemp,
+      salinity: newSalinity,
+      phLevel: newPh,
+      nitrogenLoading: newNitrogen,
+      scltdOutbreakRisk: newScltd
+    };
+  }),
+
+  clearDisruption: () => set((state) => {
+    if (!state.baselineSnapshot) return {};
+    return {
+      activeScenario: null,
+      temperature: state.baselineSnapshot.temperature,
+      salinity: state.baselineSnapshot.salinity,
+      phLevel: state.baselineSnapshot.phLevel,
+      nitrogenLoading: state.baselineSnapshot.nitrogenLoading,
+      scltdOutbreakRisk: state.baselineSnapshot.scltdOutbreakRisk,
+      baselineSnapshot: null
+    };
+  }),
+
+  runNichePrediction: () => set((state) => {
+    const input = {
+      temperature: state.temperature,
+      phLevel: state.phLevel,
+      salinity: state.salinity,
+      nitrogenLoading: state.nitrogenLoading,
+      scltdOutbreakRisk: state.scltdOutbreakRisk,
+      lionfishPresence: state.lionfishPresence,
+      parrotfishPopulation: state.parrotfishPopulation,
+      diademaPopulation: state.diademaPopulation
+    };
+    
+    const output = runNichePrediction(input);
+    
+    return {
+      unknownSpeciesAlpha: output.alpha || { predationStrength: 0, competitionWithCoral: 0, populationEstimate: 0, nicheName: '', triggerCondition: '' },
+      unknownSpeciesBeta: output.beta || { diseaseResistance: 0, nutrientUptake: 0, populationEstimate: 0, nicheName: '', triggerCondition: '' },
+      areUnknownSpeciesDiscovered: output.alphaDiscovered || output.betaDiscovered,
+      isScanning: false
+    };
+  }),
+
   getEcosystemMetrics: () => {
-    const { temperature, phLevel, nitrogenLoading, scltdOutbreakRisk, currentYear,
+    const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk, currentYear,
             diademaPopulation, algaeGrowthRate, coralResilience,
             parrotfishPopulation, grouperPopulation, lionfishPresence,
             unknownSpeciesAlpha, unknownSpeciesBeta, areUnknownSpeciesDiscovered } = get();
 
+    const key = `${temperature}-${phLevel}-${salinity}-${nitrogenLoading}-${scltdOutbreakRisk}-${currentYear}-${diademaPopulation}-${parrotfishPopulation}-${grouperPopulation}-${lionfishPresence}-${areUnknownSpeciesDiscovered}`;
+    if (get()._metricsKey === key && get()._cachedMetrics) return get()._cachedMetrics!;
+
     const yearsPassed = currentYear - 2024;
     const timeDecayFactor = yearsPassed * 0.5;
 
-    const betaDiseaseResistance = areUnknownSpeciesDiscovered ? unknownSpeciesBeta.diseaseResistance : 0;
-    const betaNutrientUptake = areUnknownSpeciesDiscovered ? unknownSpeciesBeta.nutrientUptake : 0;
-    const effectiveScltd = Math.max(0, scltdOutbreakRisk - (betaDiseaseResistance * 0.5));
-    const effectiveNitrogen = Math.max(0, nitrogenLoading - (betaNutrientUptake * 0.8));
+    const unknownAlphaStress = areUnknownSpeciesDiscovered ? unknownSpeciesAlpha.predationStrength * 0.3 + unknownSpeciesAlpha.competitionWithCoral * 0.4 : 0;
+    const unknownBetaStress = areUnknownSpeciesDiscovered ? unknownSpeciesBeta.populationEstimate * 0.2 : 0;
+
+    const effectiveScltd = scltdOutbreakRisk;
+    const effectiveNitrogen = nitrogenLoading;
 
     // 1. Bleaching Risk
     let bleachingRisk = 0;
@@ -150,7 +234,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     diademaHealth = Math.max(0, diademaHealth);
 
     // 3. New fish metrics
-    let parrotfishHealth = parrotfishPopulation - (lionfishPresence * 0.5) - (grouperPopulation * 0.06);
+    let parrotfishHealth = parrotfishPopulation - (lionfishPresence * 0.5) - (grouperPopulation * 0.06) - (unknownAlphaStress * 0.4);
     parrotfishHealth = Math.max(0, Math.min(100, parrotfishHealth));
 
     let surgeonFishHealth = 70 - (lionfishPresence * 0.4) - (temperature > 30 ? (temperature - 30) * 8 : 0);
@@ -162,9 +246,8 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     const lionfishDanger = Math.min(100, lionfishPresence);
 
     // 4. Algae Cover (parrotfish + surgeonfish help graze)
-    const alphaPredationStrength = areUnknownSpeciesDiscovered ? unknownSpeciesAlpha.predationStrength : 0;
     const herbivoreGrazing = ((100 - diademaHealth) * 0.3) + (parrotfishHealth * 0.15) + (surgeonFishHealth * 0.12);
-    let algaeCover = (algaeGrowthRate * 0.2) + (effectiveNitrogen * 0.5) - herbivoreGrazing - (alphaPredationStrength * 0.3);
+    let algaeCover = (algaeGrowthRate * 0.2) + (effectiveNitrogen * 0.5) - herbivoreGrazing;
     if (algaeCover > 40) algaeCover += timeDecayFactor;
     algaeCover = Math.max(0, Math.min(100, algaeCover));
 
@@ -177,10 +260,9 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
     // 7. Coral Health
     const phStress = phLevel < 7.9 ? (7.9 - phLevel) * 100 : 0;
-    const alphaCompetition = areUnknownSpeciesDiscovered ? unknownSpeciesAlpha.competitionWithCoral : 0;
     let coralHealth = 100 + (coralResilience * 0.2) + (zooplanktonDensity * 0.05)
       - bleachingRisk - (algaeCover * 0.5) - effectiveScltd - phStress
-      - (alphaCompetition * 0.4) - (parrotfishHealth * 0.03);
+      - (parrotfishHealth * 0.03) - (unknownAlphaStress * 0.3 + unknownBetaStress * 0.2);
     coralHealth = Math.max(0, Math.min(100, coralHealth - timeDecayFactor * ((100 - coralHealth) / 100)));
 
     // 8. Sponge competition (thrive when corals are stressed + nitrogen high)
@@ -198,12 +280,15 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       ? Math.min(100, (unknownSpeciesBeta.diseaseResistance * (effectiveScltd / 100)) * 1.2 + (unknownSpeciesBeta.nutrientUptake * (effectiveNitrogen / 100)) * 0.8 + unknownSpeciesBeta.populationEstimate * 0.3)
       : 0;
 
-    return {
+    const result = {
       diademaHealth, algaeCover, coralHealth, bleachingRisk,
       parrotfishHealth, surgeonFishHealth, grouperHealth, lionfishDanger,
       damselFishActivity, zooplanktonDensity, spongeCompetition,
       unknownAlphaEffect, unknownBetaEffect,
     };
+
+    set({ _cachedMetrics: result, _metricsKey: key });
+    return result;
   },
 
   getCoralResilienceMetrics: () => {

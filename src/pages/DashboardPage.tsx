@@ -1,7 +1,7 @@
 import Navbar from "@/components/layout/Navbar";
 import SpeciesMindMap from "@/components/dashboard/SpeciesMindMap";
 import SimulationViewMap from "@/components/dashboard/SimulationViewMap";
-import ImpactSimulationChart from "@/components/dashboard/ImpactSimulationChart";
+import CascadeImpactPanel from "@/components/dashboard/CascadeImpactPanel";
 import DetailsSidebar from "@/components/dashboard/DetailsSidebar";
 import { useEffect } from "react";
 import { useSimulationStore } from "@/store/simulationStore";
@@ -92,8 +92,8 @@ export default function DashboardPage() {
           </div>
           
           {/* Bottom half: Analytical Recharts */}
-          <div className="h-64 bg-bgCard rounded-sm border border-border shadow-lg p-3">
-             <ImpactSimulationChart />
+          <div className="h-[300px] bg-bgCard rounded-sm border border-border shadow-lg p-3">
+             <CascadeImpactPanel />
           </div>
         </div>
 

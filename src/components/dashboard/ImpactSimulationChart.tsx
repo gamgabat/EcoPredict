@@ -10,12 +10,20 @@ export default function ImpactSimulationChart() {
     const { coralHealth } = getEcosystemMetrics();
     const result = [];
     
+    const stressIndex = (temperature - 28) * 0.3 + nitrogenLoading * 0.01 + scltdOutbreakRisk * 0.01;
+
     for(let i=0; i<=50; i+=5) {
       const decay = i * 0.5 * (100 - coralHealth) / 100; // Worse base health = faster future decay
-      const randomFluctuation = Math.random() * 4 - 2; 
+      const baseValue = coralHealth;
+      const upperBound = Math.min(100, baseValue - decay + stressIndex * 2);
+      const lowerBound = Math.max(0, baseValue - decay - stressIndex * 2);
+      const midLine = (upperBound + lowerBound) / 2;
+
       result.push({
         year: currentYear + i,
-        stability: Math.max(0, Math.min(100, coralHealth - decay + randomFluctuation))
+        upper: upperBound,
+        mid: midLine,
+        lower: lowerBound,
       });
     }
     return result;
@@ -41,7 +49,9 @@ export default function ImpactSimulationChart() {
               itemStyle={{ color: 'var(--color-primary)' }}
               labelStyle={{ color: 'var(--color-textMain)' }}
             />
-            <Area type="monotone" dataKey="stability" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorStability)" />
+            <Area type="monotone" dataKey="upper" stroke="var(--color-primary)" strokeDasharray="3 3" strokeWidth={1} fillOpacity={0} />
+            <Area type="monotone" dataKey="mid" stroke="var(--color-primary)" strokeWidth={2} fillOpacity={0.6} fill="url(#colorStability)" />
+            <Area type="monotone" dataKey="lower" stroke="var(--color-primary)" strokeDasharray="3 3" strokeWidth={1} fillOpacity={0} />
           </AreaChart>
         </ResponsiveContainer>
       </div>

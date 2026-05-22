@@ -57,6 +57,8 @@ export default function SpeciesMindMap() {
     currentYear, parrotfishPopulation, grouperPopulation, lionfishPresence,
     getEcosystemMetrics,
     areUnknownSpeciesDiscovered,
+    unknownSpeciesAlpha,
+    unknownSpeciesBeta,
     selectedNodeId,
     setSelectedNodeId,
   } = useSimulationStore();
@@ -65,17 +67,28 @@ export default function SpeciesMindMap() {
   useEffect(() => {
     if (areUnknownSpeciesDiscovered) {
       setNodes(nds => {
-        if (nds.find(n => n.id === 'u-alpha')) return nds;
+        const existingAlpha = nds.find(n => n.id === 'u-alpha');
+        const alphaLabel = unknownSpeciesAlpha.nicheName || 'Unknown Species α';
+        const betaLabel = unknownSpeciesBeta.nicheName || 'Unknown Species β';
+
+        if (existingAlpha) {
+          return nds.map(n => {
+            if (n.id === 'u-alpha') return { ...n, data: { ...n.data, label: alphaLabel } };
+            if (n.id === 'u-beta') return { ...n, data: { ...n.data, label: betaLabel } };
+            return n;
+          });
+        }
+
         return [
           ...nds,
-          { id: 'u-alpha', type: 'unknownSpecies', position: { x: 420, y: -120 }, data: { label: 'Unknown Species α', unknownId: 'alpha', accentColor: '#737373' } },
-          { id: 'u-beta',  type: 'unknownSpecies', position: { x: 200, y: -120 }, data: { label: 'Unknown Species β', unknownId: 'beta',  accentColor: '#737373' } },
+          { id: 'u-alpha', type: 'unknownSpecies', position: { x: 420, y: -120 }, data: { label: alphaLabel, unknownId: 'alpha', accentColor: '#737373' } },
+          { id: 'u-beta',  type: 'unknownSpecies', position: { x: 200, y: -120 }, data: { label: betaLabel, unknownId: 'beta',  accentColor: '#737373' } },
         ];
       });
     } else {
       setNodes(nds => nds.filter(n => n.id !== 'u-alpha' && n.id !== 'u-beta'));
     }
-  }, [areUnknownSpeciesDiscovered]);
+  }, [areUnknownSpeciesDiscovered, unknownSpeciesAlpha.nicheName, unknownSpeciesBeta.nicheName]);
 
   // Rebuild dynamic edges on simulation change
   useEffect(() => {
