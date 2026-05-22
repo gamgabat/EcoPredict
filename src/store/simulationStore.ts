@@ -217,11 +217,8 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     const yearsPassed = currentYear - 2024;
     const timeDecayFactor = yearsPassed * 0.5;
 
-    const unknownAlphaStress = areUnknownSpeciesDiscovered ? unknownSpeciesAlpha.predationStrength * 0.3 + unknownSpeciesAlpha.competitionWithCoral * 0.4 : 0;
-    const unknownBetaStress = areUnknownSpeciesDiscovered ? unknownSpeciesBeta.populationEstimate * 0.2 : 0;
-
-    const effectiveScltd = scltdOutbreakRisk;
-    const effectiveNitrogen = nitrogenLoading;
+    const unknownAlphaStress = areUnknownSpeciesDiscovered ? unknownSpeciesAlpha.predationStrength * 0.3 + unknownSpeciesAlpha.competitionWithCoral * 0.4 + unknownSpeciesAlpha.populationEstimate * 0.1 : 0;
+    const unknownBetaStress = areUnknownSpeciesDiscovered ? unknownSpeciesBeta.diseaseResistance * 0.4 + unknownSpeciesBeta.nutrientUptake * 0.4 + unknownSpeciesBeta.populationEstimate * 0.2 : 0;
 
     // 1. Bleaching Risk
     let bleachingRisk = 0;
@@ -229,12 +226,12 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
       bleachingRisk = Math.max(0, Math.min(100, ((temperature - 29) * 30) - (coralResilience * 0.2) + (timeDecayFactor * 0.5)));
     }
 
-    // 2. Diadema health
-    let diademaHealth = diademaPopulation - effectiveScltd - (effectiveScltd > 20 ? timeDecayFactor * 2 : timeDecayFactor * 0.2);
+    // 2. Diadema health (unknownBetaStress amplifies disease)
+    let diademaHealth = diademaPopulation - scltdOutbreakRisk - (scltdOutbreakRisk > 20 ? timeDecayFactor * 2 : timeDecayFactor * 0.2) - (unknownBetaStress * 0.4);
     diademaHealth = Math.max(0, diademaHealth);
 
-    // 3. New fish metrics
-    let parrotfishHealth = parrotfishPopulation - (lionfishPresence * 0.5) - (grouperPopulation * 0.06) - (unknownAlphaStress * 0.4);
+    // 3. New fish metrics (unknownAlphaStress adds predation)
+    let parrotfishHealth = parrotfishPopulation - (lionfishPresence * 0.5) - (grouperPopulation * 0.06) - (unknownAlphaStress * 0.5);
     parrotfishHealth = Math.max(0, Math.min(100, parrotfishHealth));
 
     let surgeonFishHealth = 70 - (lionfishPresence * 0.4) - (temperature > 30 ? (temperature - 30) * 8 : 0);
@@ -247,7 +244,7 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
 
     // 4. Algae Cover (parrotfish + surgeonfish help graze)
     const herbivoreGrazing = ((100 - diademaHealth) * 0.3) + (parrotfishHealth * 0.15) + (surgeonFishHealth * 0.12);
-    let algaeCover = (algaeGrowthRate * 0.2) + (effectiveNitrogen * 0.5) - herbivoreGrazing;
+    let algaeCover = (algaeGrowthRate * 0.2) + (nitrogenLoading * 0.5) - herbivoreGrazing;
     if (algaeCover > 40) algaeCover += timeDecayFactor;
     algaeCover = Math.max(0, Math.min(100, algaeCover));
 
@@ -255,30 +252,23 @@ export const useSimulationStore = create<SimulationState>((set, get) => ({
     let damselFishActivity = Math.min(100, algaeCover * 0.8 + 15);
 
     // 6. Zooplankton density (bleaching events kill zooxanthellae hosts)
-    let zooplanktonDensity = 85 - (bleachingRisk * 0.5) - (effectiveNitrogen * 0.2);
+    let zooplanktonDensity = 85 - (bleachingRisk * 0.5) - (nitrogenLoading * 0.2);
     zooplanktonDensity = Math.max(0, Math.min(100, zooplanktonDensity));
 
     // 7. Coral Health
     const phStress = phLevel < 7.9 ? (7.9 - phLevel) * 100 : 0;
     let coralHealth = 100 + (coralResilience * 0.2) + (zooplanktonDensity * 0.05)
-      - bleachingRisk - (algaeCover * 0.5) - effectiveScltd - phStress
-      - (parrotfishHealth * 0.03) - (unknownAlphaStress * 0.3 + unknownBetaStress * 0.2);
+      - bleachingRisk - (algaeCover * 0.5) - scltdOutbreakRisk - phStress
+      - (parrotfishHealth * 0.03) - (unknownAlphaStress * 0.6 + unknownBetaStress * 0.6);
     coralHealth = Math.max(0, Math.min(100, coralHealth - timeDecayFactor * ((100 - coralHealth) / 100)));
 
     // 8. Sponge competition (thrive when corals are stressed + nitrogen high)
-    let spongeCompetition = 20 + (effectiveNitrogen * 0.3) + (Math.max(0, 60 - coralHealth) * 0.4);
+    let spongeCompetition = 20 + (nitrogenLoading * 0.3) + (Math.max(0, 60 - coralHealth) * 0.4);
     spongeCompetition = Math.max(0, Math.min(100, spongeCompetition));
 
-    // 9. Unknown species effectiveness (how much they're actually helping/hurting)
-    // Alpha: grazes algae → effectiveness scales with current algae problem
-    const unknownAlphaEffect = areUnknownSpeciesDiscovered
-      ? Math.min(100, (unknownSpeciesAlpha.predationStrength * (algaeCover / 100)) * 1.5 + unknownSpeciesAlpha.populationEstimate * 0.3)
-      : 0;
-
-    // Beta: fights disease + nitrogen → effectiveness scales with current threat level
-    const unknownBetaEffect = areUnknownSpeciesDiscovered
-      ? Math.min(100, (unknownSpeciesBeta.diseaseResistance * (effectiveScltd / 100)) * 1.2 + (unknownSpeciesBeta.nutrientUptake * (effectiveNitrogen / 100)) * 0.8 + unknownSpeciesBeta.populationEstimate * 0.3)
-      : 0;
+    // 9. Exported effects
+    const unknownAlphaEffect = unknownAlphaStress;
+    const unknownBetaEffect = unknownBetaStress;
 
     const result = {
       diademaHealth, algaeCover, coralHealth, bleachingRisk,
