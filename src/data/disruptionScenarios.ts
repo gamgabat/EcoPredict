@@ -8,9 +8,9 @@ export const disruptionScenarios: DisruptionScenario[] = [
     category: 'thermal',
     parameterDeltas: {
       temperature: 3.5,
-      salinity: 1.5
+      salinity: 1.5,
     },
-    legalContext: 'Implicates Section 316(a) of the Clean Water Act thermal variance provisions.'
+    legalContext: 'Implicates Section 316(a) of the Clean Water Act thermal variance provisions.',
   },
   {
     id: 'chemical_pollutant',
@@ -20,9 +20,9 @@ export const disruptionScenarios: DisruptionScenario[] = [
     parameterDeltas: {
       nitrogenLoading: 35,
       phLevel: -0.3,
-      scltdOutbreakRisk: 25
+      scltdOutbreakRisk: 25,
     },
-    legalContext: 'Implicates MARPOL Annex V and regional EIS marine discharge thresholds.'
+    legalContext: 'Implicates MARPOL Annex V and regional EIS marine discharge thresholds.',
   },
   {
     id: 'dredging_operation',
@@ -33,9 +33,9 @@ export const disruptionScenarios: DisruptionScenario[] = [
       salinity: 3,
       nitrogenLoading: 20,
       scltdOutbreakRisk: 15,
-      phLevel: -0.15
+      phLevel: -0.15,
     },
-    legalContext: 'Implicates Section 404 of the Clean Water Act and NEPA EIS requirements.'
+    legalContext: 'Implicates Section 404 of the Clean Water Act and NEPA EIS requirements.',
   },
   {
     id: 'water_intake',
@@ -45,9 +45,9 @@ export const disruptionScenarios: DisruptionScenario[] = [
     parameterDeltas: {
       temperature: 1.5,
       salinity: 2,
-      scltdOutbreakRisk: 10
+      scltdOutbreakRisk: 10,
     },
-    legalContext: 'Implicates Section 316(b) of the Clean Water Act (impingement/entrainment).'
+    legalContext: 'Implicates Section 316(b) of the Clean Water Act (impingement/entrainment).',
   },
   {
     id: 'aquaculture_discharge',
@@ -57,8 +57,8 @@ export const disruptionScenarios: DisruptionScenario[] = [
     parameterDeltas: {
       nitrogenLoading: 45,
       scltdOutbreakRisk: 30,
-      phLevel: -0.2
+      phLevel: -0.2,
     },
-    legalContext: 'Implicates EPA effluent guidelines for Concentrated Aquatic Animal Production.'
-  }
+    legalContext: 'Implicates EPA effluent guidelines for Concentrated Aquatic Animal Production.',
+  },
 ];

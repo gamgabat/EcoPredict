@@ -1,3 +1,4 @@
+> SUPERSEDED — see projectGuide/codefix.md
 # EcoPredict — AI Implementation Guide & Improvement Plan
 
 > **For AI agents executing this plan:** Read this entire document before touching any file.

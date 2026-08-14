@@ -9,10 +9,10 @@ export default function WorldNode() {
   // "World" calculates a crude holistic stability index.
   // We want to average the 'positive' components and subtract the 'negative'.
   // Perfect health: Diadema 100, Coral 100, Algae 0, Bleaching 0 -> 100%.
-  
+
   const positiveForces = (diademaHealth + coralHealth) / 2;
   const negativeForces = (algaeCover + bleachingRisk) / 2;
-  
+
   let worldStability = positiveForces - negativeForces;
   worldStability = Math.max(0, Math.min(100, worldStability));
 
@@ -31,22 +31,27 @@ export default function WorldNode() {
   }
 
   return (
-    <div 
-      className="rounded-full shadow-2xl flex flex-col items-center justify-center p-8 bg-bgCard border-4 transition-all duration-700" 
-      style={{ 
-        borderColor: mainColor, 
+    <div
+      className="rounded-full shadow-2xl flex flex-col items-center justify-center p-8 bg-bgCard border-4 transition-all duration-700"
+      style={{
+        borderColor: mainColor,
         boxShadow: `0 0 30px ${glowColor}`,
         width: '240px',
         height: '240px',
       }}
     >
       {/* Massive Target handle spanning left side */}
-      <Handle type="target" position={Position.Left} className="w-4 h-16 rounded-sm border-0 absolute -left-2 top-1/2 -translate-y-1/2" style={{ background: 'var(--color-primary)' }} />
-      
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-4 h-16 rounded-sm border-0 absolute -left-2 top-1/2 -translate-y-1/2"
+        style={{ background: 'var(--color-primary)' }}
+      />
+
       <div className="flex flex-col items-center gap-3 relative z-10 w-full text-center">
         <Globe className="w-12 h-12" style={{ color: mainColor }} />
         <h1 className="text-2xl font-black text-textMain tracking-widest uppercase">World Hub</h1>
-        
+
         <div className="flex flex-col items-center bg-bg/50 px-4 py-2 rounded-sm backdrop-blur-md border border-border mt-2">
           <span className="text-[10px] text-textMuted uppercase font-bold flex items-center gap-1">
             <Activity className="w-3 h-3" /> System Stability
@@ -55,14 +60,22 @@ export default function WorldNode() {
             {worldStability.toFixed(1)}%
           </span>
         </div>
-        
-        <span className="text-xs uppercase font-bold px-3 py-1 rounded-sm border border-border bg-bg/80" style={{ color: mainColor }}>
+
+        <span
+          className="text-xs uppercase font-bold px-3 py-1 rounded-sm border border-border bg-bg/80"
+          style={{ color: mainColor }}
+        >
           {stabilityState}
         </span>
       </div>
 
       {/* Massive Source handle spanning right side */}
-      <Handle type="source" position={Position.Right} className="w-4 h-16 rounded-sm border-0 absolute -right-2 top-1/2 -translate-y-1/2" style={{ background: '#3b82f6' }} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-4 h-16 rounded-sm border-0 absolute -right-2 top-1/2 -translate-y-1/2"
+        style={{ background: '#3b82f6' }}
+      />
     </div>
   );
 }

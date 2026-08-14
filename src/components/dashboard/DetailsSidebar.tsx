@@ -1,7 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import { useSimulationStore } from '@/store/simulationStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Thermometer, FlaskConical, Cuboid, Bug, Droplets, Waves, Swords, CircleAlert } from 'lucide-react';
+import {
+  Thermometer,
+  FlaskConical,
+  Cuboid,
+  Bug,
+  Droplets,
+  Waves,
+  Swords,
+  CircleAlert,
+} from 'lucide-react';
 import DisruptionPanel from './DisruptionPanel';
 
 // ── Reusable slider row ───────────────────────────────────────────────────────
@@ -19,19 +28,35 @@ interface SliderRowProps {
   deltaColor?: string;
 }
 
-function SliderRow({ label, value, unit, accentColor, min, max, step, onChange, locked, deltaLabel, deltaColor }: SliderRowProps) {
+function SliderRow({
+  label,
+  value,
+  unit,
+  accentColor,
+  min,
+  max,
+  step,
+  onChange,
+  locked,
+  deltaLabel,
+  deltaColor,
+}: SliderRowProps) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex justify-between items-center">
         <label className="text-xs font-bold text-textMuted">{label}</label>
         <div className="flex items-center gap-2">
           {deltaLabel && (
-            <span className="text-[10px] font-mono px-1 rounded-sm whitespace-nowrap" style={{ color: deltaColor, backgroundColor: `${deltaColor}20` }}>
+            <span
+              className="text-[10px] font-mono px-1 rounded-sm whitespace-nowrap"
+              style={{ color: deltaColor, backgroundColor: `${deltaColor}20` }}
+            >
               {deltaLabel}
             </span>
           )}
           <span className="text-xs text-textMain font-mono bg-bg px-1.5 py-0.5 rounded border border-border">
-            {typeof value === 'number' ? value.toFixed(step < 1 ? 1 : 0) : value}{unit}
+            {typeof value === 'number' ? value.toFixed(step < 1 ? 1 : 0) : value}
+            {unit}
           </span>
         </div>
       </div>
@@ -40,7 +65,10 @@ function SliderRow({ label, value, unit, accentColor, min, max, step, onChange, 
         disabled={locked}
         className="w-full h-1.5 cursor-pointer appearance-none rounded-full bg-textMuted/30 disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ accentColor }}
-        min={min} max={max} step={step} value={value}
+        min={min}
+        max={max}
+        step={step}
+        value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
       />
     </div>
@@ -73,9 +101,23 @@ interface ToleranceRowProps {
   invertDanger?: boolean; // for metrics where higher is worse (e.g. disease)
 }
 
-function ToleranceRow({ label, current, safeMin, safeMax, warnMin, warnMax, unit, icon }: ToleranceRowProps) {
+function ToleranceRow({
+  label,
+  current,
+  safeMin,
+  safeMax,
+  warnMin,
+  warnMax,
+  unit,
+  icon,
+}: ToleranceRowProps) {
   const inSafe = current >= safeMin && current <= safeMax;
-  const inWarn = !inSafe && warnMin !== undefined && warnMax !== undefined && current >= warnMin && current <= warnMax;
+  const inWarn =
+    !inSafe &&
+    warnMin !== undefined &&
+    warnMax !== undefined &&
+    current >= warnMin &&
+    current <= warnMax;
   const status = inSafe ? 'safe' : inWarn ? 'warn' : 'danger';
   const colors = { safe: '#22c55e', warn: '#f59e0b', danger: '#ef4444' };
   const labels = { safe: 'OK', warn: 'Stress', danger: 'Critical' };
@@ -88,11 +130,24 @@ function ToleranceRow({ label, current, safeMin, safeMax, warnMin, warnMax, unit
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-bold text-textMuted truncate">{label}</span>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="text-[10px] font-mono text-textMain">{typeof current === 'number' && !Number.isInteger(current) ? current.toFixed(1) : current}{unit}</span>
-            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm" style={{ backgroundColor: `${color}20`, color }}>{labels[status]}</span>
+            <span className="text-[10px] font-mono text-textMain">
+              {typeof current === 'number' && !Number.isInteger(current)
+                ? current.toFixed(1)
+                : current}
+              {unit}
+            </span>
+            <span
+              className="text-[9px] font-bold px-1.5 py-0.5 rounded-sm"
+              style={{ backgroundColor: `${color}20`, color }}
+            >
+              {labels[status]}
+            </span>
           </div>
         </div>
-        <div className="text-[9px] text-textMuted/60 mt-0.5">Safe: {safeMin}–{safeMax}{unit}</div>
+        <div className="text-[9px] text-textMuted/60 mt-0.5">
+          Safe: {safeMin}–{safeMax}
+          {unit}
+        </div>
       </div>
     </div>
   );
@@ -112,7 +167,9 @@ function InfoChip({ label, value }: { label: string; value: string }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <span className="text-[9px] font-bold text-textMuted uppercase tracking-widest opacity-60">{title}</span>
+      <span className="text-[9px] font-bold text-textMuted uppercase tracking-widest opacity-60">
+        {title}
+      </span>
       {children}
     </div>
   );
@@ -123,30 +180,85 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
   const store = useSimulationStore();
   const metrics = store.getEcosystemMetrics();
   const { diademaHealth, algaeCover, bleachingRisk } = metrics;
-  const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk, lionfishPresence } = store;
+  const { temperature, phLevel, salinity, nitrogenLoading, scltdOutbreakRisk, lionfishPresence } =
+    store;
 
   if (nodeId === 's-diadema') {
-    const status = diademaHealth < 40 ? 'Population Crash' : diademaHealth < 65 ? 'Declining' : 'Healthy';
+    const status =
+      diademaHealth < 40 ? 'Population Crash' : diademaHealth < 65 ? 'Declining' : 'Healthy';
     const statusColor = diademaHealth < 40 ? '#ef4444' : diademaHealth < 65 ? '#f59e0b' : '#22c55e';
     return (
       <div className="flex flex-col gap-4">
         <Section title="Population Status">
           <div className="flex justify-between items-center">
             <HealthBar value={diademaHealth} color="#64748b" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(diademaHealth)}%</span>
+            <span
+              className="text-[10px] font-bold ml-2 flex-shrink-0"
+              style={{ color: statusColor }}
+            >
+              {Math.round(diademaHealth)}%
+            </span>
           </div>
-          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{status}</span>
+          <span className="text-[10px] font-bold" style={{ color: statusColor }}>
+            {status}
+          </span>
         </Section>
 
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={29} warnMin={20} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.9} safeMax={8.3} warnMin={7.7} warnMax={8.5} unit="" icon={<FlaskConical className="w-4 h-4" />} />
-          <ToleranceRow label="Salinity" current={salinity} safeMin={33} safeMax={36} warnMin={30} warnMax={40} unit=" ppt" icon={<Cuboid className="w-4 h-4" />} />
-          <ToleranceRow label="SCLTD Risk" current={scltdOutbreakRisk} safeMin={0} safeMax={15} warnMin={0} warnMax={30} unit="%" icon={<Bug className="w-4 h-4" />} invertDanger />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={22}
+            safeMax={29}
+            warnMin={20}
+            warnMax={31}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="pH Level"
+            current={phLevel}
+            safeMin={7.9}
+            safeMax={8.3}
+            warnMin={7.7}
+            warnMax={8.5}
+            unit=""
+            icon={<FlaskConical className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Salinity"
+            current={salinity}
+            safeMin={33}
+            safeMax={36}
+            warnMin={30}
+            warnMax={40}
+            unit=" ppt"
+            icon={<Cuboid className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="SCLTD Risk"
+            current={scltdOutbreakRisk}
+            safeMin={0}
+            safeMax={15}
+            warnMin={0}
+            warnMax={30}
+            unit="%"
+            icon={<Bug className="w-4 h-4" />}
+            invertDanger
+          />
         </Section>
 
         <Section title="Controls">
-          <SliderRow label="Population Density" value={store.diademaPopulation} unit="%" accentColor="#64748b" min={0} max={100} step={1} onChange={store.setDiademaPopulation} />
+          <SliderRow
+            label="Population Density"
+            value={store.diademaPopulation}
+            unit="%"
+            accentColor="#64748b"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setDiademaPopulation}
+          />
         </Section>
 
         <Section title="Species Profile">
@@ -154,36 +266,100 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <InfoChip label="Lifespan" value="~10–15 years" />
           <InfoChip label="Diet" value="Macroalgae, turf algae, detritus" />
           <InfoChip label="Reproduction" value="Broadcast spawning" />
-          <InfoChip label="Key Threat" value="SCLTD disease (1983 mass die-off wiped 97% of Caribbean population)" />
-          <InfoChip label="Ecological Role" value="Primary bioeroder & reef grazer; prevents algal takeover" />
+          <InfoChip
+            label="Key Threat"
+            value="SCLTD disease (1983 mass die-off wiped 97% of Caribbean population)"
+          />
+          <InfoChip
+            label="Ecological Role"
+            value="Primary bioeroder & reef grazer; prevents algal takeover"
+          />
         </Section>
       </div>
     );
   }
 
   if (nodeId === 's-algae') {
-    const status = algaeCover > 60 ? 'Dominant' : algaeCover > 40 ? 'Blooming' : algaeCover > 20 ? 'Moderate' : 'Controlled';
+    const status =
+      algaeCover > 60
+        ? 'Dominant'
+        : algaeCover > 40
+          ? 'Blooming'
+          : algaeCover > 20
+            ? 'Moderate'
+            : 'Controlled';
     const statusColor = algaeCover > 60 ? '#ef4444' : algaeCover > 40 ? '#f59e0b' : '#10b981';
     return (
       <div className="flex flex-col gap-4">
         <Section title="Cover Status">
           <div className="flex justify-between items-center">
             <HealthBar value={algaeCover} color="#10b981" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(algaeCover)}%</span>
+            <span
+              className="text-[10px] font-bold ml-2 flex-shrink-0"
+              style={{ color: statusColor }}
+            >
+              {Math.round(algaeCover)}%
+            </span>
           </div>
-          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{status}</span>
-          {algaeCover > 40 && <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">⚠ Above 40% cover — smothering corals</div>}
+          <span className="text-[10px] font-bold" style={{ color: statusColor }}>
+            {status}
+          </span>
+          {algaeCover > 40 && (
+            <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">
+              ⚠ Above 40% cover — smothering corals
+            </div>
+          )}
         </Section>
 
         <Section title="Growth Conditions (Current)">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon={<FlaskConical className="w-4 h-4" />} invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.0} safeMax={9.0} unit="" icon={<Droplets className="w-4 h-4" />} />
-          <ToleranceRow label="Salinity" current={salinity} safeMin={25} safeMax={40} unit=" ppt" icon={<Cuboid className="w-4 h-4" />} />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={20}
+            safeMax={32}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Nitrogen Loading"
+            current={nitrogenLoading}
+            safeMin={0}
+            safeMax={20}
+            warnMin={0}
+            warnMax={40}
+            unit="%"
+            icon={<FlaskConical className="w-4 h-4" />}
+            invertDanger
+          />
+          <ToleranceRow
+            label="pH Level"
+            current={phLevel}
+            safeMin={7.0}
+            safeMax={9.0}
+            unit=""
+            icon={<Droplets className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Salinity"
+            current={salinity}
+            safeMin={25}
+            safeMax={40}
+            unit=" ppt"
+            icon={<Cuboid className="w-4 h-4" />}
+          />
         </Section>
 
         <Section title="Controls">
-          <SliderRow label="Growth Rate Multiplier" value={store.algaeGrowthRate} unit="%" accentColor="#10b981" min={0} max={100} step={1} onChange={store.setAlgaeGrowthRate} />
+          <SliderRow
+            label="Growth Rate Multiplier"
+            value={store.algaeGrowthRate}
+            unit="%"
+            accentColor="#10b981"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setAlgaeGrowthRate}
+          />
         </Section>
 
         <Section title="Species Profile">
@@ -192,7 +368,10 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <InfoChip label="Critical Threshold" value=">40% cover → smothering phase" />
           <InfoChip label="Key Driver" value="Nitrogen runoff + loss of herbivores" />
           <InfoChip label="Natural Controls" value="Diadema urchins, parrotfish, surgeonfish" />
-          <InfoChip label="Ecological Risk" value="Phase shift from coral to algae-dominated reef is often irreversible" />
+          <InfoChip
+            label="Ecological Risk"
+            value="Phase shift from coral to algae-dominated reef is often irreversible"
+          />
         </Section>
       </div>
     );
@@ -202,32 +381,43 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const isBleaching = bleachingRisk > 30;
     const rm = store.getCoralResilienceMetrics();
 
-    const speciesData: Record<string, {
-      name: string; depth: string; growth: string;
-      baseline: number;
-      finalResilience: number;
-      toleranceNote: string;
-      notes: string;
-    }> = {
+    const speciesData: Record<
+      string,
+      {
+        name: string;
+        depth: string;
+        growth: string;
+        baseline: number;
+        finalResilience: number;
+        toleranceNote: string;
+        notes: string;
+      }
+    > = {
       'c-porites': {
         name: 'Porites astreoides',
-        depth: '0–50 m', growth: '3–5 mm/yr (massive form)',
+        depth: '0–50 m',
+        growth: '3–5 mm/yr (massive form)',
         baseline: 78,
         finalResilience: rm.porites,
-        toleranceNote: 'Highly tolerant of sedimentation, light variability & degraded reefs — but susceptible to SCLTD',
+        toleranceNote:
+          'Highly tolerant of sedimentation, light variability & degraded reefs — but susceptible to SCLTD',
         notes: 'Star coral; one of the most common Caribbean corals. Can survive mild bleaching.',
       },
       'c-sidera': {
         name: 'Siderastrea siderea',
-        depth: '0–70 m', growth: '4–6 mm/yr',
+        depth: '0–70 m',
+        growth: '4–6 mm/yr',
         baseline: 63,
         finalResilience: rm.siderastrea,
-        toleranceNote: 'Massive, long-lived — but easily affected by temperature extremes and disease',
-        notes: 'Massive starlet coral; extremely durable. Survives bleaching events that kill others.',
+        toleranceNote:
+          'Massive, long-lived — but easily affected by temperature extremes and disease',
+        notes:
+          'Massive starlet coral; extremely durable. Survives bleaching events that kill others.',
       },
       'c-monta': {
         name: 'Montastraea cavernosa',
-        depth: '1–70 m', growth: '5–12 mm/yr',
+        depth: '1–70 m',
+        growth: '5–12 mm/yr',
         baseline: 40,
         finalResilience: rm.montastraea,
         toleranceNote: 'Highly susceptible to SCLTD; sensitive to nitrogen loading and pH changes',
@@ -237,8 +427,20 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const sp = speciesData[nodeId];
 
     const finalR = sp.finalResilience;
-    const status = isBleaching ? 'Bleaching' : finalR < 15 ? 'Critical' : finalR < 35 ? 'Stressed' : 'Healthy';
-    const statusColor = isBleaching ? '#ef4444' : finalR < 15 ? '#ef4444' : finalR < 35 ? '#f59e0b' : '#22c55e';
+    const status = isBleaching
+      ? 'Bleaching'
+      : finalR < 15
+        ? 'Critical'
+        : finalR < 35
+          ? 'Stressed'
+          : 'Healthy';
+    const statusColor = isBleaching
+      ? '#ef4444'
+      : finalR < 15
+        ? '#ef4444'
+        : finalR < 35
+          ? '#f59e0b'
+          : '#22c55e';
 
     const factorRow = (label: string, score: number, icon: React.ReactNode) => {
       const pct = Math.round(score * 100);
@@ -248,9 +450,14 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           <span className="text-base w-5 flex-shrink-0">{icon}</span>
           <span className="text-[10px] text-textMuted w-16 flex-shrink-0">{label}</span>
           <div className="flex-1 bg-textMuted/20 rounded-full h-1.5 overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: fc }} />
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${pct}%`, backgroundColor: fc }}
+            />
           </div>
-          <span className="text-[10px] font-mono text-textMain w-8 text-right flex-shrink-0">{pct}%</span>
+          <span className="text-[10px] font-mono text-textMain w-8 text-right flex-shrink-0">
+            {pct}%
+          </span>
         </div>
       );
     };
@@ -260,18 +467,35 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
         <Section title="Colony Resilience">
           <div className="flex justify-between items-center">
             <HealthBar value={finalR} color="#f97316" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{finalR.toFixed(1)}%</span>
+            <span
+              className="text-[10px] font-bold ml-2 flex-shrink-0"
+              style={{ color: statusColor }}
+            >
+              {finalR.toFixed(1)}%
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold" style={{ color: statusColor }}>{status}</span>
-            {isBleaching && <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-error/20 text-error font-bold animate-pulse">BLEACHING</span>}
+            <span className="text-[10px] font-bold" style={{ color: statusColor }}>
+              {status}
+            </span>
+            {isBleaching && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded-sm bg-error/20 text-error font-bold animate-pulse">
+                BLEACHING
+              </span>
+            )}
           </div>
-          {isBleaching && <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">⚠ Reduce temperature below 29°C or increase coral resilience to halt bleaching.</div>}
+          {isBleaching && (
+            <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error">
+              ⚠ Reduce temperature below 29°C or increase coral resilience to halt bleaching.
+            </div>
+          )}
         </Section>
 
         <Section title="Resilience Formula">
           <div className="bg-bg/60 border border-border/50 rounded p-2 flex flex-col gap-1">
-            <div className="text-[9px] text-textMuted/80 font-mono">Final = Baseline × Env. Condition Score</div>
+            <div className="text-[9px] text-textMuted/80 font-mono">
+              Final = Baseline × Env. Condition Score
+            </div>
             <div className="text-[9px] font-mono text-textMain">
               {finalR.toFixed(1)} = {sp.baseline}% × {(rm.envScore * 100).toFixed(1)}%
             </div>
@@ -287,12 +511,23 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
           {factorRow('Salinity', rm.factors.salinity, <Cuboid className="w-4 h-4" />)}
           <div className="flex items-center gap-2 border-t border-border pt-2 mt-1">
             <span className="text-[10px] text-textMuted flex-1">Combined Score</span>
-            <span className="text-[10px] font-bold font-mono text-textMain">{(rm.envScore * 100).toFixed(1)}%</span>
+            <span className="text-[10px] font-bold font-mono text-textMain">
+              {(rm.envScore * 100).toFixed(1)}%
+            </span>
           </div>
         </Section>
 
         <Section title="Controls">
-          <SliderRow label="Resilience (all coral spp.)" value={store.coralResilience} unit="%" accentColor="#f97316" min={0} max={100} step={1} onChange={store.setCoralResilience} />
+          <SliderRow
+            label="Resilience (all coral spp.)"
+            value={store.coralResilience}
+            unit="%"
+            accentColor="#f97316"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setCoralResilience}
+          />
         </Section>
 
         <Section title="Species Profile">
@@ -307,94 +542,6 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     );
   }
 
-  if (nodeId === 'u-alpha') {
-    const effect = metrics.unknownAlphaEffect;
-    const statusText = effect < 20 ? 'Dormant' : effect < 50 ? 'Active' : 'Dominant';
-    const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#a855f7' : '#c084fc';
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
-            style={{ backgroundColor: '#a855f720', color: '#a855f7', border: '1px solid #a855f740' }}>
-            ✦ AI-Predicted Species
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-textMain">{store.unknownSpeciesAlpha.nicheName || 'Unknown Species α'}</span>
-            <span className="text-[10px] text-textMuted leading-snug">{store.unknownSpeciesAlpha.triggerCondition}</span>
-          </div>
-        </div>
-
-        <Section title="Live Effectiveness">
-          <div className="flex justify-between items-center">
-            <HealthBar value={effect} color="#a855f7" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(effect)}%</span>
-          </div>
-          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
-          <div className="text-[9px] text-textMuted/70 bg-bg/60 rounded p-2 border border-border/50">
-            Effectiveness rises as algae cover increases — this species becomes more impactful the worse the algae bloom gets.
-          </div>
-        </Section>
-
-        <Section title="Predicted Traits">
-          <SliderRow label="Predation Strength" value={store.unknownSpeciesAlpha.predationStrength} unit="%" accentColor="#a855f7" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesAlpha({ predationStrength: v })} />
-          <SliderRow label="Space Competition" value={store.unknownSpeciesAlpha.competitionWithCoral} unit="%" accentColor="#a855f7" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesAlpha({ competitionWithCoral: v })} />
-          <SliderRow label="Population Estimate" value={store.unknownSpeciesAlpha.populationEstimate} unit="%" accentColor="#a855f7" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesAlpha({ populationEstimate: v })} />
-        </Section>
-        <Section title="Predicted Profile">
-          <InfoChip label="Primary Role" value="Algae predator / herbivore" />
-          <InfoChip label="Key Effect" value="Reduces macroalgae cover" />
-          <InfoChip label="Side Effect" value="Competes with coral for settlement space" />
-          <InfoChip label="Confidence" value="Model-derived — not field-verified" />
-          <InfoChip label="Basis" value="Trait inferred from current algae overload and grazer deficit" />
-        </Section>
-      </div>
-    );
-  }
-
-  if (nodeId === 'u-beta') {
-    const effect = metrics.unknownBetaEffect;
-    const statusText = effect < 20 ? 'Dormant' : effect < 50 ? 'Active' : 'Dominant';
-    const statusColor = effect < 20 ? '#94a3b8' : effect < 50 ? '#7c3aed' : '#a78bfa';
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="text-[10px] px-2 py-1 rounded-sm font-bold inline-flex items-center gap-1 self-start"
-            style={{ backgroundColor: '#7c3aed20', color: '#7c3aed', border: '1px solid #7c3aed40' }}>
-            ✦ AI-Predicted Species
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-textMain">{store.unknownSpeciesBeta.nicheName || 'Unknown Species β'}</span>
-            <span className="text-[10px] text-textMuted leading-snug">{store.unknownSpeciesBeta.triggerCondition}</span>
-          </div>
-        </div>
-
-        <Section title="Live Effectiveness">
-          <div className="flex justify-between items-center">
-            <HealthBar value={effect} color="#7c3aed" />
-            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: statusColor }}>{Math.round(effect)}%</span>
-          </div>
-          <span className="text-[10px] font-bold" style={{ color: statusColor }}>{statusText}</span>
-          <div className="text-[9px] text-textMuted/70 bg-bg/60 rounded p-2 border border-border/50">
-            Effectiveness rises with SCLTD disease risk and nitrogen overload — this species becomes a stronger buffer the more threatened the reef is.
-          </div>
-        </Section>
-
-        <Section title="Predicted Traits">
-          <SliderRow label="Disease Resistance" value={store.unknownSpeciesBeta.diseaseResistance} unit="%" accentColor="#7c3aed" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesBeta({ diseaseResistance: v })} />
-          <SliderRow label="Nutrient Uptake" value={store.unknownSpeciesBeta.nutrientUptake} unit="%" accentColor="#7c3aed" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesBeta({ nutrientUptake: v })} />
-          <SliderRow label="Population Estimate" value={store.unknownSpeciesBeta.populationEstimate} unit="%" accentColor="#7c3aed" min={0} max={100} step={1} onChange={(v) => store.setUnknownSpeciesBeta({ populationEstimate: v })} />
-        </Section>
-        <Section title="Predicted Profile">
-          <InfoChip label="Primary Role" value="Disease buffer / nutrient sink" />
-          <InfoChip label="Key Effect" value="Reduces SCLTD risk & nitrogen load" />
-          <InfoChip label="Side Effect" value="None predicted — net beneficial" />
-          <InfoChip label="Confidence" value="Model-derived — not field-verified" />
-          <InfoChip label="Basis" value="Trait inferred from high disease risk and nitrogen overload in current conditions" />
-        </Section>
-      </div>
-    );
-  }
-
   if (nodeId === 'p-parrot') {
     const h = metrics.parrotfishHealth;
     const status = h < 30 ? 'Depleted' : h < 60 ? 'Low' : 'Abundant';
@@ -402,16 +549,58 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Population Status">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#8b5cf6" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
-          <span className="text-[10px] font-bold" style={{ color: sc }}>{status}</span>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#8b5cf6" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
+          <span className="text-[10px] font-bold" style={{ color: sc }}>
+            {status}
+          </span>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Lionfish Presence" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={40} unit="%" icon={<CircleAlert className="w-4 h-4" />} invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.3} unit="" icon={<FlaskConical className="w-4 h-4" />} />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={22}
+            safeMax={30}
+            warnMin={20}
+            warnMax={32}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Lionfish Presence"
+            current={lionfishPresence}
+            safeMin={0}
+            safeMax={20}
+            warnMin={0}
+            warnMax={40}
+            unit="%"
+            icon={<CircleAlert className="w-4 h-4" />}
+            invertDanger
+          />
+          <ToleranceRow
+            label="pH Level"
+            current={phLevel}
+            safeMin={7.8}
+            safeMax={8.3}
+            unit=""
+            icon={<FlaskConical className="w-4 h-4" />}
+          />
         </Section>
         <Section title="Controls">
-          <SliderRow label="Population" value={store.parrotfishPopulation} unit="%" accentColor="#8b5cf6" min={0} max={100} step={1} onChange={store.setParrotfishPopulation} />
+          <SliderRow
+            label="Population"
+            value={store.parrotfishPopulation}
+            unit="%"
+            accentColor="#8b5cf6"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setParrotfishPopulation}
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Labridae (Scarinae)" />
@@ -431,11 +620,35 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Population Status">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#0ea5e9" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#0ea5e9" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={30} warnMin={20} warnMax={32} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Lionfish Pressure" current={lionfishPresence} safeMin={0} safeMax={20} warnMin={0} warnMax={45} unit="%" icon={<CircleAlert className="w-4 h-4" />} invertDanger />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={22}
+            safeMax={30}
+            warnMin={20}
+            warnMax={32}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Lionfish Pressure"
+            current={lionfishPresence}
+            safeMin={0}
+            safeMax={20}
+            warnMin={0}
+            warnMax={45}
+            unit="%"
+            icon={<CircleAlert className="w-4 h-4" />}
+            invertDanger
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Acanthuridae" />
@@ -454,21 +667,60 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Population Status">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#475569" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#475569" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={21} safeMax={29} warnMin={19} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Lionfish Competition" current={lionfishPresence} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon={<Swords className="w-4 h-4" />} invertDanger />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={21}
+            safeMax={29}
+            warnMin={19}
+            warnMax={31}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Lionfish Competition"
+            current={lionfishPresence}
+            safeMin={0}
+            safeMax={30}
+            warnMin={0}
+            warnMax={60}
+            unit="%"
+            icon={<Swords className="w-4 h-4" />}
+            invertDanger
+          />
         </Section>
         <Section title="Controls">
-          <SliderRow label="Population" value={store.grouperPopulation} unit="%" accentColor="#475569" min={0} max={100} step={1} onChange={store.setGrouperPopulation} />
+          <SliderRow
+            label="Population"
+            value={store.grouperPopulation}
+            unit="%"
+            accentColor="#475569"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setGrouperPopulation}
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Epinephelidae" />
           <InfoChip label="Role" value="Apex reef predator; controls herbivore populations" />
           <InfoChip label="Diet" value="Parrotfish, surgeonfish, snappers" />
-          <InfoChip label="Ecological Value" value="Trophic cascade: fewer groupers → more parrotfish → less algae" />
-          <InfoChip label="Key Threat" value="Overfishing, warm-water stress, lionfish competition" />
+          <InfoChip
+            label="Ecological Value"
+            value="Trophic cascade: fewer groupers → more parrotfish → less algae"
+          />
+          <InfoChip
+            label="Key Threat"
+            value="Overfishing, warm-water stress, lionfish competition"
+          />
         </Section>
       </div>
     );
@@ -480,23 +732,58 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     const label = h < 20 ? 'Minimal Threat' : h < 50 ? 'Spreading' : 'Dominant Threat';
     return (
       <div className="flex flex-col gap-4">
-        <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error font-bold">⚠ Invasive Species — native to Indo-Pacific</div>
+        <div className="bg-error/10 border border-error/30 rounded p-2 text-[10px] text-error font-bold">
+          ⚠ Invasive Species — native to Indo-Pacific
+        </div>
         <Section title="Threat Level">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#dc2626" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
-          <span className="text-[10px] font-bold" style={{ color: sc }}>{label}</span>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#dc2626" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
+          <span className="text-[10px] font-bold" style={{ color: sc }}>
+            {label}
+          </span>
         </Section>
         <Section title="Conditions (Thrives in)">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={22} safeMax={35} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Reef Complexity" current={100 - metrics.coralHealth} safeMin={20} safeMax={80} unit="%" icon={<Waves className="w-4 h-4" />} />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={22}
+            safeMax={35}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Reef Complexity"
+            current={100 - metrics.coralHealth}
+            safeMin={20}
+            safeMax={80}
+            unit="%"
+            icon={<Waves className="w-4 h-4" />}
+          />
         </Section>
         <Section title="Controls">
-          <SliderRow label="Presence / Pressure" value={store.lionfishPresence} unit="%" accentColor="#dc2626" min={0} max={100} step={1} onChange={store.setLionfishPresence} />
+          <SliderRow
+            label="Presence / Pressure"
+            value={store.lionfishPresence}
+            unit="%"
+            accentColor="#dc2626"
+            min={0}
+            max={100}
+            step={1}
+            onChange={store.setLionfishPresence}
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Scorpaenidae · Pterois volitans" />
           <InfoChip label="Origin" value="Indo-Pacific; first Caribbean sighting 1985" />
           <InfoChip label="Diet" value="Juvenile parrotfish, surgeonfish, crustaceans" />
-          <InfoChip label="Danger" value="No natural Caribbean predators; reproduces every 4 days" />
+          <InfoChip
+            label="Danger"
+            value="No natural Caribbean predators; reproduces every 4 days"
+          />
           <InfoChip label="Control" value="Manual removal (culling), training grouper" />
         </Section>
       </div>
@@ -509,15 +796,25 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Activity Level">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#f59e0b" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
-          <span className="text-[10px] text-textMuted text-[9px]">Higher algae cover = higher damselfish territoriality</span>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#f59e0b" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
+          <span className="text-[10px] text-textMuted text-[9px]">
+            Higher algae cover = higher damselfish territoriality
+          </span>
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Classification" value="Pomacentridae" />
           <InfoChip label="Behavior" value="Farms algae patches; aggressively defends territory" />
           <InfoChip label="Net Effect" value="Increases local algae cover; reduces grazer access" />
           <InfoChip label="Competition" value="Territorial conflict with Diadema urchins" />
-          <InfoChip label="Note" value="Paradoxically harms reef by promoting the algae that smothers it" />
+          <InfoChip
+            label="Note"
+            value="Paradoxically harms reef by promoting the algae that smothers it"
+          />
         </Section>
       </div>
     );
@@ -529,18 +826,52 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Population Density">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#06b6d4" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#06b6d4" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
         </Section>
         <Section title="Environmental Tolerances">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={29} warnMin={18} warnMax={31} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Nitrogen Loading" current={nitrogenLoading} safeMin={0} safeMax={30} warnMin={0} warnMax={60} unit="%" icon={<FlaskConical className="w-4 h-4" />} invertDanger />
-          <ToleranceRow label="pH Level" current={phLevel} safeMin={7.8} safeMax={8.4} unit="" icon={<Droplets className="w-4 h-4" />} />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={20}
+            safeMax={29}
+            warnMin={18}
+            warnMax={31}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Nitrogen Loading"
+            current={nitrogenLoading}
+            safeMin={0}
+            safeMax={30}
+            warnMin={0}
+            warnMax={60}
+            unit="%"
+            icon={<FlaskConical className="w-4 h-4" />}
+            invertDanger
+          />
+          <ToleranceRow
+            label="pH Level"
+            current={phLevel}
+            safeMin={7.8}
+            safeMax={8.4}
+            unit=""
+            icon={<Droplets className="w-4 h-4" />}
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Group" value="Copepods, amphipods, larvae, fish eggs" />
           <InfoChip label="Role" value="Primary food source for filter-feeding corals" />
           <InfoChip label="Coral Link" value="Zooplankton provides ~70% of coral nitrogen budget" />
-          <InfoChip label="Key Threat" value="Bleaching events, ocean acidification, eutrophication" />
+          <InfoChip
+            label="Key Threat"
+            value="Bleaching events, ocean acidification, eutrophication"
+          />
         </Section>
       </div>
     );
@@ -552,19 +883,49 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
     return (
       <div className="flex flex-col gap-4">
         <Section title="Competitive Pressure">
-          <div className="flex justify-between items-center"><HealthBar value={h} color="#d97706" /><span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>{Math.round(h)}%</span></div>
-          <span className="text-[9px] text-textMuted">Higher value = more coral space displaced</span>
+          <div className="flex justify-between items-center">
+            <HealthBar value={h} color="#d97706" />
+            <span className="text-[10px] font-bold ml-2 flex-shrink-0" style={{ color: sc }}>
+              {Math.round(h)}%
+            </span>
+          </div>
+          <span className="text-[9px] text-textMuted">
+            Higher value = more coral space displaced
+          </span>
         </Section>
         <Section title="Growth Conditions">
-          <ToleranceRow label="Temperature" current={temperature} safeMin={20} safeMax={33} unit="°C" icon={<Thermometer className="w-4 h-4" />} />
-          <ToleranceRow label="Nitrogen (benefits)" current={nitrogenLoading} safeMin={10} safeMax={100} unit="%" icon={<FlaskConical className="w-4 h-4" />} />
+          <ToleranceRow
+            label="Temperature"
+            current={temperature}
+            safeMin={20}
+            safeMax={33}
+            unit="°C"
+            icon={<Thermometer className="w-4 h-4" />}
+          />
+          <ToleranceRow
+            label="Nitrogen (benefits)"
+            current={nitrogenLoading}
+            safeMin={10}
+            safeMax={100}
+            unit="%"
+            icon={<FlaskConical className="w-4 h-4" />}
+          />
         </Section>
         <Section title="Species Profile">
           <InfoChip label="Phylum" value="Porifera" />
           <InfoChip label="Role" value="Filter feeders; compete with coral for hard substrate" />
-          <InfoChip label="Nitrogen Tolerance" value="Thrive in eutrophic conditions that stress corals" />
-          <InfoChip label="Net Effect" value="Reef phase-shift indicator: high sponge cover = degraded reef" />
-          <InfoChip label="Benefit" value="Provide habitat; support biodiversity during transitions" />
+          <InfoChip
+            label="Nitrogen Tolerance"
+            value="Thrive in eutrophic conditions that stress corals"
+          />
+          <InfoChip
+            label="Net Effect"
+            value="Reef phase-shift indicator: high sponge cover = degraded reef"
+          />
+          <InfoChip
+            label="Benefit"
+            value="Provide habitat; support biodiversity during transitions"
+          />
         </Section>
       </div>
     );
@@ -573,52 +934,42 @@ function CreatureDetail({ nodeId }: { nodeId: string }) {
   return null;
 }
 
-
 // ── Main sidebar ──────────────────────────────────────────────────────────────
 export default function DetailsSidebar() {
   const store = useSimulationStore();
-  const { 
-    selectedNodeId,
-    areUnknownSpeciesDiscovered,
-    isScanning, setIsScanning,
-  } = store;
+  const { selectedNodeId } = store;
 
   const NODE_LABELS: Record<string, string> = {
     's-diadema': 'Diadema (Urchin)',
-    's-algae':   'Macroalgae Turf',
+    's-algae': 'Macroalgae Turf',
     'c-porites': 'Porites astreoides',
-    'c-monta':   'Montastraea cavern.',
-    'c-sidera':  'Siderastrea siderea',
-    'u-alpha':   'Unknown Species α',
-    'u-beta':    'Unknown Species β',
-    'zoo':       'Zooplankton',
-    'p-parrot':  'Parrotfish',
+    'c-monta': 'Montastraea cavern.',
+    'c-sidera': 'Siderastrea siderea',
+    zoo: 'Zooplankton',
+    'p-parrot': 'Parrotfish',
     'p-surgeon': 'Surgeonfish',
     'p-grouper': 'Grouper',
-    'p-lion':    'Lionfish (Invasive)',
-    'p-damsel':  'Damselfish',
-    'p-sponge':  'Sponges',
+    'p-lion': 'Lionfish (Invasive)',
+    'p-damsel': 'Damselfish',
+    'p-sponge': 'Sponges',
   };
 
   const NODE_COLORS: Record<string, string> = {
     's-diadema': '#64748b',
-    's-algae':   '#10b981',
+    's-algae': '#10b981',
     'c-porites': '#f97316',
-    'c-monta':   '#f97316',
-    'c-sidera':  '#f97316',
-    'u-alpha':   '#a855f7',
-    'u-beta':    '#7c3aed',
-    'zoo':       '#06b6d4',
-    'p-parrot':  '#8b5cf6',
+    'c-monta': '#f97316',
+    'c-sidera': '#f97316',
+    zoo: '#06b6d4',
+    'p-parrot': '#8b5cf6',
     'p-surgeon': '#0ea5e9',
     'p-grouper': '#475569',
-    'p-lion':    '#dc2626',
-    'p-damsel':  '#f59e0b',
-    'p-sponge':  '#d97706',
+    'p-lion': '#dc2626',
+    'p-damsel': '#f59e0b',
+    'p-sponge': '#d97706',
   };
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [scanFailed, setScanFailed] = React.useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -629,23 +980,28 @@ export default function DetailsSidebar() {
     return () => clearTimeout(timer);
   }, [selectedNodeId]);
 
-  const renderDelta = (paramKey: string, current: number, isHarmfulIncrease: boolean, isHarmfulDecrease: boolean = false) => {
+  const renderDelta = (
+    paramKey: string,
+    current: number,
+    isHarmfulIncrease: boolean,
+    isHarmfulDecrease: boolean = false,
+  ) => {
     if (!store.activeScenario || !store.baselineSnapshot) return undefined;
     const base = store.baselineSnapshot[paramKey];
     if (base === undefined) return undefined;
     const delta = current - base;
     if (Math.abs(delta) < 0.01) return undefined;
-    
+
     const sign = delta > 0 ? '↑' : '↓';
     const num = Math.abs(delta).toFixed(1);
-    
+
     let color = '#3b82f6'; // blue for neutral
     if (delta > 0 && isHarmfulIncrease) color = '#ef4444'; // red
     if (delta < 0 && isHarmfulDecrease) color = '#ef4444'; // red
-    
+
     return {
       label: `[${sign} ${delta > 0 ? '+' : '-'}${num} from baseline]`,
-      color
+      color,
     };
   };
 
@@ -654,7 +1010,7 @@ export default function DetailsSidebar() {
   const nDelta = renderDelta('nitrogenLoading', store.nitrogenLoading, true);
   const pDelta = renderDelta('phLevel', store.phLevel, false, true); // pH drop is harmful
   const salDelta = renderDelta('salinity', store.salinity, true, true); // Salinity change either way can be stressful, let's treat deviation as harmful
-  
+
   const isScenarioActive = !!store.activeScenario;
 
   return (
@@ -662,21 +1018,139 @@ export default function DetailsSidebar() {
       <DisruptionPanel />
       {/* ── Top: Global Environment ── */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 border-b border-border">
-        <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70">Environment</h3>
-        <SliderRow label="Temperature" value={store.temperature} unit="°C" accentColor="#f59e0b" min={20} max={35} step={0.5} onChange={store.setTemperature} locked={isScenarioActive} deltaLabel={tDelta?.label} deltaColor={tDelta?.color} />
-        <SliderRow label="SCLTD Disease" value={store.scltdOutbreakRisk} unit="%" accentColor="#ef4444" min={0} max={100} step={1} onChange={store.setScltdOutbreakRisk} locked={isScenarioActive} deltaLabel={sDelta?.label} deltaColor={sDelta?.color} />
-        <SliderRow label="Nitrogen Loading" value={store.nitrogenLoading} unit="%" accentColor="#84cc16" min={0} max={100} step={1} onChange={store.setNitrogenLoading} locked={isScenarioActive} deltaLabel={nDelta?.label} deltaColor={nDelta?.color} />
-        <SliderRow label="pH Level" value={store.phLevel} unit="" accentColor="#10b981" min={7.0} max={8.5} step={0.1} onChange={store.setPhLevel} locked={isScenarioActive} deltaLabel={pDelta?.label} deltaColor={pDelta?.color} />
-        <SliderRow label="Salinity" value={store.salinity} unit=" ppt" accentColor="#3b82f6" min={20} max={45} step={1} onChange={store.setSalinity} locked={isScenarioActive} deltaLabel={salDelta?.label} deltaColor={salDelta?.color} />
+        <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70">
+          Environment
+        </h3>
+        <SliderRow
+          label="Temperature"
+          value={store.temperature}
+          unit="°C"
+          accentColor="#f59e0b"
+          min={20}
+          max={35}
+          step={0.5}
+          onChange={store.setTemperature}
+          locked={isScenarioActive}
+          deltaLabel={tDelta?.label}
+          deltaColor={tDelta?.color}
+        />
+        <SliderRow
+          label="SCLTD Disease"
+          value={store.scltdOutbreakRisk}
+          unit="%"
+          accentColor="#ef4444"
+          min={0}
+          max={100}
+          step={1}
+          onChange={store.setScltdOutbreakRisk}
+          locked={isScenarioActive}
+          deltaLabel={sDelta?.label}
+          deltaColor={sDelta?.color}
+        />
+        <SliderRow
+          label="Nitrogen Loading"
+          value={store.nitrogenLoading}
+          unit="%"
+          accentColor="#84cc16"
+          min={0}
+          max={100}
+          step={1}
+          onChange={store.setNitrogenLoading}
+          locked={isScenarioActive}
+          deltaLabel={nDelta?.label}
+          deltaColor={nDelta?.color}
+        />
+        <SliderRow
+          label="pH Level"
+          value={store.phLevel}
+          unit=""
+          accentColor="#10b981"
+          min={7.0}
+          max={8.5}
+          step={0.1}
+          onChange={store.setPhLevel}
+          locked={isScenarioActive}
+          deltaLabel={pDelta?.label}
+          deltaColor={pDelta?.color}
+        />
+        <SliderRow
+          label="Salinity"
+          value={store.salinity}
+          unit=" ppt"
+          accentColor="#3b82f6"
+          min={20}
+          max={45}
+          step={1}
+          onChange={store.setSalinity}
+          locked={isScenarioActive}
+          deltaLabel={salDelta?.label}
+          deltaColor={salDelta?.color}
+        />
         <div className="border-t border-border pt-3">
-          <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70 mb-3">Species Controls</h3>
+          <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70 mb-3">
+            Species Controls
+          </h3>
           <div className="flex flex-col gap-3">
-            <SliderRow label="Urchin Density" value={store.diademaPopulation} unit="%" accentColor="#64748b" min={0} max={100} step={1} onChange={store.setDiademaPopulation} />
-            <SliderRow label="Algae Growth Rate" value={store.algaeGrowthRate} unit="%" accentColor="#10b981" min={0} max={100} step={1} onChange={store.setAlgaeGrowthRate} />
-            <SliderRow label="Coral Resilience" value={store.coralResilience} unit="%" accentColor="#f97316" min={0} max={100} step={1} onChange={store.setCoralResilience} />
-            <SliderRow label="Parrotfish Pop." value={store.parrotfishPopulation} unit="%" accentColor="#8b5cf6" min={0} max={100} step={1} onChange={store.setParrotfishPopulation} />
-            <SliderRow label="Grouper Pop." value={store.grouperPopulation} unit="%" accentColor="#475569" min={0} max={100} step={1} onChange={store.setGrouperPopulation} />
-            <SliderRow label="Lionfish Presence" value={store.lionfishPresence} unit="%" accentColor="#dc2626" min={0} max={100} step={1} onChange={store.setLionfishPresence} />
+            <SliderRow
+              label="Urchin Density"
+              value={store.diademaPopulation}
+              unit="%"
+              accentColor="#64748b"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setDiademaPopulation}
+            />
+            <SliderRow
+              label="Algae Growth Rate"
+              value={store.algaeGrowthRate}
+              unit="%"
+              accentColor="#10b981"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setAlgaeGrowthRate}
+            />
+            <SliderRow
+              label="Coral Resilience"
+              value={store.coralResilience}
+              unit="%"
+              accentColor="#f97316"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setCoralResilience}
+            />
+            <SliderRow
+              label="Parrotfish Pop."
+              value={store.parrotfishPopulation}
+              unit="%"
+              accentColor="#8b5cf6"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setParrotfishPopulation}
+            />
+            <SliderRow
+              label="Grouper Pop."
+              value={store.grouperPopulation}
+              unit="%"
+              accentColor="#475569"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setGrouperPopulation}
+            />
+            <SliderRow
+              label="Lionfish Presence"
+              value={store.lionfishPresence}
+              unit="%"
+              accentColor="#dc2626"
+              min={0}
+              max={100}
+              step={1}
+              onChange={store.setLionfishPresence}
+            />
           </div>
         </div>
       </div>
@@ -694,7 +1168,10 @@ export default function DetailsSidebar() {
               className="flex flex-col gap-4"
             >
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: NODE_COLORS[selectedNodeId] }} />
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: NODE_COLORS[selectedNodeId] }}
+                />
                 <h3 className="text-xs font-bold text-textMain uppercase tracking-widest opacity-70 truncate">
                   {NODE_LABELS[selectedNodeId]}
                 </h3>
@@ -710,64 +1187,32 @@ export default function DetailsSidebar() {
               className="flex-1 flex flex-col items-center justify-center text-center gap-3 py-8"
             >
               <div className="w-12 h-12 rounded-sm bg-bgHover flex items-center justify-center">
-                <svg className="w-6 h-6 text-textMuted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5" />
+                <svg
+                  className="w-6 h-6 text-textMuted"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"
+                  />
                 </svg>
               </div>
               <div>
                 <p className="text-xs font-bold text-textMuted">No creature selected</p>
-                <p className="text-[10px] text-textMuted/60 mt-1">Click any node in the mind map<br/>to view and edit its details.</p>
+                <p className="text-[10px] text-textMuted/60 mt-1">
+                  Click any node in the interaction network
+                  <br />
+                  to view and edit its details.
+                </p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      {/* ── Bottom: AI Discovery Button ── */}
-      <AnimatePresence>
-        {!areUnknownSpeciesDiscovered && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="flex-shrink-0 p-3 border-t border-border flex flex-col gap-2"
-          >
-            <button
-              onClick={() => {
-                setIsScanning(true);
-                setScanFailed(false);
-                setTimeout(() => {
-                  store.runNichePrediction();
-                  if (!useSimulationStore.getState().areUnknownSpeciesDiscovered) {
-                    setScanFailed(true);
-                  }
-                }, 2000);
-              }}
-              disabled={isScanning}
-              className="w-full py-2.5 bg-primary hover:bg-primaryHover disabled:opacity-60 disabled:cursor-not-allowed text-bg text-xs font-bold rounded-sm transition-colors flex items-center justify-center gap-2"
-            >
-              {isScanning ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
-                  Scanning Ecosystem...
-                </>
-              ) : (
-                <>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Find Best Fitting Species
-                </>
-              )}
-            </button>
-            {scanFailed && (
-              <div className="text-[10px] text-error bg-error/10 border border-error/30 p-2 rounded text-center font-medium">
-                No additional niches detected under current conditions. Try applying a disruption scenario.
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

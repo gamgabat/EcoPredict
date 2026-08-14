@@ -1,5 +1,11 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Reef Oracle — agent instructions
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This is a **Vite + React 19 + TypeScript** single-page app (Zustand, ReactFlow, Recharts, Tailwind
+v4). It is **not** Next.js — there is no `app/` or `pages/` router, no `node_modules/next`, and no
+Next.js-specific API. Routing is client-side via `react-router-dom` (`src/App.tsx`).
+
+The product concept is currently mid-migration. Before making any change, read
+`projectGuide/codefix.md` — it is the authoritative, self-contained plan: the product contract,
+what's already done, what's left, and the exact acceptance criteria for each task. Do not act on
+`projectGuide/mainIdea.md`, `projectGuide/implementation.md`, or `projectGuide/techStack.md` — they
+are marked superseded and describe the abandoned product concept.

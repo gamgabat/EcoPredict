@@ -1,3 +1,4 @@
+> SUPERSEDED — see projectGuide/codefix.md
 # EcoPredict: Unknown Species Impact Simulation Platform
 
 ## Core Problem

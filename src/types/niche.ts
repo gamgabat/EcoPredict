@@ -15,21 +15,21 @@ export interface UnknownSpeciesBeta {
 }
 
 export interface NichePredictionInput {
-  temperature:       number;
-  phLevel:           number;
-  salinity:          number;
-  nitrogenLoading:   number;
+  temperature: number;
+  phLevel: number;
+  salinity: number;
+  nitrogenLoading: number;
   scltdOutbreakRisk: number;
-  lionfishPresence:  number;
+  lionfishPresence: number;
   parrotfishPopulation: number;
   diademaPopulation: number;
 }
 
 export interface NichePredictionOutput {
   alphaDiscovered: boolean;
-  betaDiscovered:  boolean;
+  betaDiscovered: boolean;
   alpha: UnknownSpeciesAlpha | null;
-  beta:  UnknownSpeciesBeta  | null;
+  beta: UnknownSpeciesBeta | null;
   alphaRule: string; // which rule triggered, or 'none'
-  betaRule:  string;
+  betaRule: string;
 }

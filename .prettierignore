@@ -1,0 +1,9 @@
+node_modules
+dist
+build.log
+package-lock.json
+
+# Frozen historical record (T-1.16) — content must never be reflowed by tooling.
+projectGuide/mainIdea.md
+projectGuide/implementation.md
+projectGuide/techStack.md

@@ -1,9 +1,17 @@
 import { Handle, Position } from 'reactflow';
 import { useSimulationStore } from '@/store/simulationStore';
 
-type SpeciesId = 'diadema' | 'algae' | 'coral' |
-  'parrotfish' | 'surgeonfish' | 'grouper' | 'lionfish' |
-  'damselfish' | 'zooplankton' | 'sponge';
+type SpeciesId =
+  | 'diadema'
+  | 'algae'
+  | 'coral'
+  | 'parrotfish'
+  | 'surgeonfish'
+  | 'grouper'
+  | 'lionfish'
+  | 'damselfish'
+  | 'zooplankton'
+  | 'sponge';
 
 interface SpeciesNodeProps {
   data: {
@@ -68,8 +76,16 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
   }
 
   const barColor = isBleaching ? '#ffffff' : data.accentColor;
-  const bgColor = isBleaching ? '#ffffff' : isInvader ? 'var(--color-textMain)' : 'var(--color-bgCard)';
-  const textColor = isBleaching ? '#111111' : isInvader ? 'var(--color-bg)' : 'var(--color-textMain)';
+  const bgColor = isBleaching
+    ? '#ffffff'
+    : isInvader
+      ? 'var(--color-textMain)'
+      : 'var(--color-bgCard)';
+  const textColor = isBleaching
+    ? '#111111'
+    : isInvader
+      ? 'var(--color-bg)'
+      : 'var(--color-textMain)';
   const badgeColor = isInvader ? '#ef4444' : isBleaching ? '#ef4444' : data.accentColor;
 
   return (
@@ -77,14 +93,25 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
       className="border rounded-sm p-3 shadow-xl min-w-[160px] transition-colors duration-500"
       style={{ backgroundColor: bgColor, borderColor: barColor }}
     >
-      <Handle type="target" position={Position.Left} className="w-3 h-3 border-2 border-bgCard" style={{ background: barColor }} />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 border-2 border-bgCard"
+        style={{ background: barColor }}
+      />
 
       <div className="flex flex-col gap-2.5">
         <div className="flex justify-between items-start gap-2">
-          <label className="text-xs font-bold leading-tight" style={{ color: textColor }}>{data.label}</label>
+          <label className="text-xs font-bold leading-tight" style={{ color: textColor }}>
+            {data.label}
+          </label>
           <span
             className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded-sm border flex-shrink-0"
-            style={{ backgroundColor: `${badgeColor}25`, color: textColor, borderColor: badgeColor }}
+            style={{
+              backgroundColor: `${badgeColor}25`,
+              color: textColor,
+              borderColor: badgeColor,
+            }}
           >
             {statusText}
           </span>
@@ -93,12 +120,20 @@ export default function SpeciesNode({ data }: SpeciesNodeProps) {
         <div className="w-full bg-textMuted/20 rounded-full h-1.5 overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${Math.max(0, Math.min(100, healthValue))}%`, backgroundColor: barColor }}
+            style={{
+              width: `${Math.max(0, Math.min(100, healthValue))}%`,
+              backgroundColor: barColor,
+            }}
           />
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="w-3 h-3 border-2 border-bgCard" style={{ background: barColor }} />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 border-2 border-bgCard"
+        style={{ background: barColor }}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import DashboardPage from "./pages/DashboardPage";
-import LandingPage from "./pages/LandingPage";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import DashboardPage from './pages/DashboardPage';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   return (

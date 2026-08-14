@@ -1,3 +1,4 @@
+> SUPERSEDED — see projectGuide/codefix.md
 # Technology Stack for EcoPredict Platform
 
 ## Frontend Framework (Updated)

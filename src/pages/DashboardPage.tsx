@@ -1,24 +1,24 @@
-import Navbar from "@/components/layout/Navbar";
-import SpeciesMindMap from "@/components/dashboard/SpeciesMindMap";
-import SimulationViewMap from "@/components/dashboard/SimulationViewMap";
-import CascadeImpactPanel from "@/components/dashboard/CascadeImpactPanel";
-import DetailsSidebar from "@/components/dashboard/DetailsSidebar";
-import { useEffect } from "react";
-import { useSimulationStore } from "@/store/simulationStore";
+import Navbar from '@/components/layout/Navbar';
+import SpeciesMindMap from '@/components/dashboard/SpeciesMindMap';
+import SimulationViewMap from '@/components/dashboard/SimulationViewMap';
+import CascadeImpactPanel from '@/components/dashboard/CascadeImpactPanel';
+import DetailsSidebar from '@/components/dashboard/DetailsSidebar';
+import { useEffect } from 'react';
+import { useSimulationStore } from '@/store/simulationStore';
+import { BRAND } from '@/config/brand';
 
 export default function DashboardPage() {
   const { currentYear, setCurrentYear } = useSimulationStore();
 
   useEffect(() => {
-    document.title = "Coral Reef EIA Simulator | EcoPredict";
+    document.title = `${BRAND.name} — Screening Workspace`;
   }, []);
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-bg flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1 w-full flex flex-col lg:flex-row mt-16 p-4 gap-4 overflow-hidden">
-        
         {/* Pane 1: Details Sidebar */}
         <div className="w-72 flex-shrink-0 bg-bgCard rounded-sm border border-border shadow-lg overflow-hidden flex flex-col">
           <div className="p-4 border-b border-border bg-bg/50 backdrop-blur-sm flex-shrink-0">
@@ -38,41 +38,71 @@ export default function DashboardPage() {
               {/* Title + Legend */}
               <div className="flex items-center gap-3 flex-wrap">
                 <h2 className="font-bold text-textMain text-sm uppercase tracking-wider flex-shrink-0">
-                  Species Mind Map
+                  Candidate Interaction Network
                 </h2>
                 {/* Legend */}
                 <div className="flex items-center gap-2.5 flex-wrap">
                   {/* Solid line = feeding/grazing */}
                   <div className="flex items-center gap-1.5">
-                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#a3a3a3" strokeWidth="2"/><polygon points="15,1 20,4 15,7" fill="#a3a3a3"/></svg>
-                    <span className="text-[9px] text-textMuted uppercase tracking-wide">Feeding</span>
+                    <svg width="20" height="8" viewBox="0 0 20 8">
+                      <line x1="0" y1="4" x2="20" y2="4" stroke="#a3a3a3" strokeWidth="2" />
+                      <polygon points="15,1 20,4 15,7" fill="#a3a3a3" />
+                    </svg>
+                    <span className="text-[9px] text-textMuted uppercase tracking-wide">
+                      Feeding
+                    </span>
                   </div>
                   {/* Dashed line = competition/side-effect */}
                   <div className="flex items-center gap-1.5">
-                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#737373" strokeWidth="2" strokeDasharray="4,2"/><polygon points="15,1 20,4 15,7" fill="#737373"/></svg>
-                    <span className="text-[9px] text-textMuted uppercase tracking-wide">Competition</span>
+                    <svg width="20" height="8" viewBox="0 0 20 8">
+                      <line
+                        x1="0"
+                        y1="4"
+                        x2="20"
+                        y2="4"
+                        stroke="#737373"
+                        strokeWidth="2"
+                        strokeDasharray="4,2"
+                      />
+                      <polygon points="15,1 20,4 15,7" fill="#737373" />
+                    </svg>
+                    <span className="text-[9px] text-textMuted uppercase tracking-wide">
+                      Competition
+                    </span>
                   </div>
                   {/* Animated / pulsing = active threat */}
                   <div className="flex items-center gap-1.5">
-                    <svg width="20" height="8" viewBox="0 0 20 8"><line x1="0" y1="4" x2="20" y2="4" stroke="#ef4444" strokeWidth="2.5"/><polygon points="15,1 20,4 15,7" fill="#ef4444"/></svg>
-                    <span className="text-[9px] text-textMuted uppercase tracking-wide">Active Threat</span>
+                    <svg width="20" height="8" viewBox="0 0 20 8">
+                      <line x1="0" y1="4" x2="20" y2="4" stroke="#ef4444" strokeWidth="2.5" />
+                      <polygon points="15,1 20,4 15,7" fill="#ef4444" />
+                    </svg>
+                    <span className="text-[9px] text-textMuted uppercase tracking-wide">
+                      Active Threat
+                    </span>
                   </div>
                 </div>
               </div>
-              <span className="text-xs bg-bgHover text-textMain border border-border px-2 py-1 rounded-sm flex-shrink-0">Food Web</span>
+              <span className="text-xs bg-bgHover text-textMain border border-border px-2 py-1 rounded-sm flex-shrink-0">
+                Food Web
+              </span>
             </div>
-            
+
             <div className="flex items-center gap-4 bg-bgCard border border-border p-2 rounded-sm">
-              <label className="text-xs font-bold text-textMuted uppercase whitespace-nowrap">Timeline Year: <span className="text-textMain">{currentYear}</span></label>
-              <input 
-                type="range" min="2024" max="2074" step="1" 
-                value={currentYear} 
+              <label className="text-xs font-bold text-textMuted uppercase whitespace-nowrap">
+                Timeline Year: <span className="text-textMain">{currentYear}</span>
+              </label>
+              <input
+                type="range"
+                min="2024"
+                max="2074"
+                step="1"
+                value={currentYear}
                 onChange={(e) => setCurrentYear(parseInt(e.target.value))}
                 className="w-full accent-primary cursor-pointer h-2 bg-textMuted rounded-sm appearance-none"
               />
             </div>
           </div>
-          
+
           {/* Mind Map Area (Flex grow) */}
           <div className="flex-1 relative">
             <SpeciesMindMap />
@@ -85,20 +115,18 @@ export default function DashboardPage() {
           <div className="flex-1 bg-bgCard rounded-sm border border-border shadow-lg flex flex-col overflow-hidden relative">
             <div className="p-3 border-b border-border bg-bg/50 backdrop-blur-sm absolute w-full z-10">
               <h2 className="font-bold text-textMain text-sm uppercase tracking-wider">
-                Spatial Simulation Map
+                Population Map
               </h2>
             </div>
             <SimulationViewMap />
           </div>
-          
+
           {/* Bottom half: Analytical Recharts */}
           <div className="h-[300px] bg-bgCard rounded-sm border border-border shadow-lg p-3">
-             <CascadeImpactPanel />
+            <CascadeImpactPanel />
           </div>
         </div>
-
       </main>
     </div>
   );
 }
-
